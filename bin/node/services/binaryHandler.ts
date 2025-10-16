@@ -11,10 +11,10 @@ export class BinaryHandler {
         }
     }
 
-    static execute(command: string) {
+    static execute(command: string, ignoreIo: boolean = true) {
         try {
             console.log(`Running ${command}`);
-            execSync(`${command}`, { stdio: 'ignore' });
+            execSync(`${command}`, { stdio: ignoreIo ? 'ignore' : 'pipe' });
             return true;
         } catch {
             return false;
