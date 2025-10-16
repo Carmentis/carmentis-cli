@@ -1,0 +1,25 @@
+# This section specifies configuration for the snapshot management.
+[snapshots]
+snapshot_block_period = 1 # Period after which a snapshot is generated. (Default: 1)
+block_history_before_snapshot = 0 # Number of blocks ahead not included in the snapshot. (Default: 0)
+max_snapshots = 3 # Maximum number of snapshots preserved by the node. (Default: 3)
+
+# This section specifies information about the CometBFT configuration (such that exposed RPC endpoint)
+[cometbft]
+exposed_rpc_endpoint = 'https://exposed-rpc-endpoint-host:port'
+
+# This section specifies the port where ABCI listens request coming from CometBFT.
+# When omitted, the port 26658 is used when available, otherwise another free port is used.
+[abci.grpc]
+port = 26658
+
+# This section specifies the port where ABCI accepts carmentis-specific queries.
+# Note that this area is still under development and coexists with the /abci_query endpoints.
+# When omitted, the port 26659 is used when available, otherwise another free port is used.
+[abci.query.rest]
+port = 26659
+
+# This section specifies several paths used by the ABCI server.
+[paths]
+cometbft_home = "/path/to/cometbft/home" # Specifies where the CometBFT home is located (used to recover the CometBFT's public key).
+storage = "/path/to/store/abci/data" # Specifies where data are stored.

@@ -1,0 +1,77 @@
+import * as TOML from '@iarna/toml';
+import { TomlExporter } from './tomlExporter';
+import { join } from 'path';
+
+export interface AbciConfigParams {
+    home: string,
+    exposedRpcEndpoint: string,
+    genesis?: {
+        sk: string,
+    },
+    genesis_snapshot?: {
+        fromRpcEndpoint: string,
+    },
+}
+export class AbciConfigGenerator {
+
+    constructor(private readonly params: AbciConfigParams) {}
+
+    async generateConfig() {
+        let config: any = {
+            cometbft: {
+                exposed_rpc_endpoint: this.exposedRpcEndpoint,
+            },
+            abci: {
+                grpc: {
+                    port: 26_658
+                },
+                rest: {
+                    query: {
+                        port: 26_659
+                    }
+                }
+            },
+            paths: {
+                cometbft_home: '/cometbft',
+                storage: '/abci',
+            },
+            snapshots:  {
+                snapshot_block_period: 1,
+                block_history_before_snapshot: 0,
+                max_snapshots: 3,
+            }
+        };
+
+        if (this.params.genesis_snapshot) {
+            config = {
+                ...config,
+                genesis_snapshot: {
+                    rpc_endpoint: this.params.genesis_snapshot.fromRpcEndpoint
+                }
+            }
+        }
+
+        if (this.params.genesis) {
+            config = {
+                ...config,
+                genesis: {
+                    private_key: {
+                        sk: this.params.genesis.sk,
+                    },
+                }
+            }
+        }
+
+        // export the config
+        const configFilePath = join(this.home, 'config.toml');
+        await TomlExporter.exportToFile(config, configFilePath);
+    }
+
+    private get exposedRpcEndpoint() {
+        return this.params.exposedRpcEndpoint;
+    }
+
+    private get home() {
+        return this.params.home;
+    }
+}

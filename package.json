@@ -1,0 +1,42 @@
+{
+  "name": "@cmts-dev/carmentis-cli",
+  "version": "0.0.1",
+  "description": "Carmentis CLI",
+  "author": "Carmentis",
+  "license": "Apache-2.0",
+  "bin": {
+    "cmts-node": "dist/node/cmts-node.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node bin/node/cmts-node.ts",
+    "semantic-release": "semantic-release"
+  },
+  "dependencies": {
+    "@cmts-dev/carmentis-sdk": "^1.13.3",
+    "@iarna/toml": "^2.2.5",
+    "commander": "^14.0.1",
+    "inquirer": "^12.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "semantic-release": "^24.1.3",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^10.3.5",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/exec": "^6.0.3"
+  }
+}
