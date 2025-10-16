@@ -31,9 +31,9 @@ export class InitService {
     async generateConfig() {
         // ensure binaries are installed
         const areAllBinariesInstalled =
-            DockerBinary.isDockerInstalled() &&
-            CometbftBinary.isGoInstalled() &&
-            CometbftBinary.isCometBFTInstalled();
+            DockerBinary.isDockerInstalled();
+            //CometbftBinary.isGoInstalled() &&
+            //CometbftBinary.isCometBFTInstalled();
 
         if (!areAllBinariesInstalled) {
             console.error(

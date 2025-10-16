@@ -14,7 +14,7 @@ export class BinaryHandler {
     static execute(command: string, ignoreIo: boolean = true) {
         try {
             console.log(`Running ${command}`);
-            execSync(`${command}`, { stdio: ignoreIo ? 'ignore' : 'pipe' });
+            execSync(`${command}`, { stdio: ignoreIo ? 'ignore' : 'inherit' });
             return true;
         } catch {
             return false;
