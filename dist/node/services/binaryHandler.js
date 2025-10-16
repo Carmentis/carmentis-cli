@@ -15,7 +15,7 @@ class BinaryHandler {
     static execute(command, ignoreIo = true) {
         try {
             console.log(`Running ${command}`);
-            (0, child_process_1.execSync)(`${command}`, { stdio: ignoreIo ? 'ignore' : 'pipe' });
+            (0, child_process_1.execSync)(`${command}`, { stdio: ignoreIo ? 'ignore' : 'inherit' });
             return true;
         }
         catch {

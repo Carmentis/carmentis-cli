@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Carmentis/carmentis-cli/compare/v1.1.1...v1.2.0) (2025-10-16)
+
+
+### Features
+
+* execution do not require go and cometbft to be installed anymore ([3188bda](https://github.com/Carmentis/carmentis-cli/commit/3188bda335af078becdc6e8c12e70d9794605e8a))
+
 ## [1.1.1](https://github.com/Carmentis/carmentis-cli/compare/v1.1.0...v1.1.1) (2025-10-16)
 
 

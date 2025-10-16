@@ -4,7 +4,6 @@ exports.InitService = void 0;
 const networksStore_1 = require("./networksStore");
 const prompts_1 = require("@inquirer/prompts");
 const dockerBinary_1 = require("./dockerBinary");
-const cometbftBinary_1 = require("./cometbftBinary");
 const cometBFTEndpointAccumulator_1 = require("./cometBFTEndpointAccumulator");
 const nodeInfo_1 = require("./nodeInfo");
 const CometBFTConfigGenerator_1 = require("./CometBFTConfigGenerator");
@@ -21,9 +20,9 @@ class InitService {
     }
     async generateConfig() {
         // ensure binaries are installed
-        const areAllBinariesInstalled = dockerBinary_1.DockerBinary.isDockerInstalled() &&
-            cometbftBinary_1.CometbftBinary.isGoInstalled() &&
-            cometbftBinary_1.CometbftBinary.isCometBFTInstalled();
+        const areAllBinariesInstalled = dockerBinary_1.DockerBinary.isDockerInstalled();
+        //CometbftBinary.isGoInstalled() &&
+        //CometbftBinary.isCometBFTInstalled();
         if (!areAllBinariesInstalled) {
             console.error('Please, ensure go, cometbft and docker are all installed before to proceed.');
             return;
