@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Carmentis/carmentis-cli/compare/v1.1.0...v1.1.1) (2025-10-16)
+
+
+### Bug Fixes
+
+* remove built output from versioning ([118b6fa](https://github.com/Carmentis/carmentis-cli/commit/118b6fa90cb0665e71171e29ad9a779145bed953))
+
 # [1.1.0](https://github.com/Carmentis/carmentis-cli/compare/v1.0.0...v1.1.0) (2025-10-16)
 
 
