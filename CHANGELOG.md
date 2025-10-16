@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Carmentis/carmentis-cli/compare/v1.0.0...v1.1.0) (2025-10-16)
+
+
+### Features
+
+* general purpose CLI naming ([92aaf72](https://github.com/Carmentis/carmentis-cli/commit/92aaf72daba6d11281c7b7196c8df0d54e816c9f))
+
 # 1.0.0 (2025-10-16)
 
 
