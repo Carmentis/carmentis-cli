@@ -50,8 +50,6 @@ export class KeygenCommand {
         const pk = sk.getPublicKey();
 
         const outJson = {
-            type,
-            schemeId: scheme,
             privateKey: encoder.encodePrivateKey(sk),
             publicKey: encoder.encodePublicKey(pk),
         } as const;

@@ -5,7 +5,8 @@
   "author": "Carmentis",
   "license": "Apache-2.0",
   "bin": {
-    "cmts-node": "dist/node/cmts-node.js"
+    "cmts": "dist/node/cmts-cli.js",
+    "cmts-node": "dist/node/cmts-cli.js node"
   },
   "files": [
     "dist",

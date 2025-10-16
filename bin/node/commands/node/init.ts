@@ -1,7 +1,7 @@
 import commander from 'commander';
-import { SafeCommandRunner } from './safeCommandRunner';
+import { SafeCommandRunner } from '../safeCommandRunner';
 
-import { InitService } from '../services/InitService';
+import { InitService } from '../../services/InitService';
 
 export class InitConfigCommand {
     register(program: commander.Command) {

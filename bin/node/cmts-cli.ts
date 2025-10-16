@@ -2,19 +2,17 @@
 import { KeygenCommand } from './commands/keygen';
 import { NetworksCommand } from './commands/networks';
 import { Command } from 'commander';
-import { InitConfigCommand } from './commands/init';
+import {NodeCommand} from "./commands/node";
 
 const bootstrap = async () => {
-    console.log('Carmentis Node');
     // create the description of the binary
-    const program = new Command("cmts-node");
-    program.name('Carmentis Node CLI').description('CLI for Carmentis Node');
+    const program = new Command("cmts");
+    program.name('Carmentis CLI').description('CLI for Carmentis');
 
-
-    // register additional commands
+    // register top-level commands
+    new NodeCommand().register(program);
     new KeygenCommand().register(program);
     new NetworksCommand().register(program);
-    new InitConfigCommand().register(program)
 
     program.parse(process.argv);
 };
