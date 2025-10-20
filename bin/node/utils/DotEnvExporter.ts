@@ -1,0 +1,29 @@
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import {FileManager} from "./FileManager";
+
+export class DotEnvExporter {
+    /**
+     * Exports a config object to a .env file
+     * @param config An object containing key-value pairs to write into the .env file
+     * @param exportAt The file path where the .env content should be written
+     */
+    static async exportToFile(config: Record<string, string>, exportAt: string): Promise<void> {
+        try {
+            // Create .env lines
+            const lines = Object.entries(config).map(([key, value]) => {
+                // Escape values containing spaces or quotes
+                const escapedValue = value.includes(' ') || value.includes('"')
+                    ? `"${value.replace(/"/g, '\\"')}"`
+                    : value;
+                return `${key}=${escapedValue}`;
+            });
+
+            const content = lines.join('\n') + '\n';
+            await FileManager.writeFile(content, exportAt);
+        } catch (error) {
+            console.error(`Failed to write .env file:`, error);
+            throw error;
+        }
+    }
+}

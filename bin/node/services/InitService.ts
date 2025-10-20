@@ -1,16 +1,16 @@
 import { NetworksStore } from './networksStore';
 import { confirm, input, select } from '@inquirer/prompts';
-import { DockerBinary } from './dockerBinary';
-import { CometbftBinary } from './cometbftBinary';
+import { DockerBinary } from '../utils/dockerBinary';
+import { CometBFTBinary } from './CometBFTBinary';
 import { CometBFTEndpointAccumulator } from './cometBFTEndpointAccumulator';
 import { NodeInfoService } from './nodeInfo';
 import { CometBFTConfigGenerator } from './CometBFTConfigGenerator';
 import { join } from 'path';
 import { AbciConfigGenerator } from './AbciConfigGenerator';
-import { EndpointTransformer } from './EndpointTransformer';
+import { EndpointTransformer } from '../utils/EndpointTransformer';
 import { StringSignatureEncoder } from '@cmts-dev/carmentis-sdk/server';
-import { FileDownloader } from './FileDownloader';
-import { NodeInfoFetcher } from './NodeInfoFetcher';
+import { FileDownloader } from '../utils/FileDownloader';
+import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
 
 export type InitParameters = {
     home: string;

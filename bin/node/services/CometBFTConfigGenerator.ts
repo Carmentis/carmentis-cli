@@ -1,10 +1,10 @@
 import { CometBFTEndpointAccumulator } from './cometBFTEndpointAccumulator';
-import { CometbftBinary } from './cometbftBinary';
+import { CometBFTBinary } from './CometBFTBinary';
 import { join } from 'path';
-import { TomlEditor } from './TomlEditor';
-import { NodeInfoFetcher } from './NodeInfoFetcher';
-import { JsonEditor } from './JsonEditor';
-import { JsonExporter } from './JsonExporter';
+import { TomlEditor } from '../utils/TomlEditor';
+import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
+import { JsonEditor } from '../utils/JsonEditor';
+import { JsonExporter } from '../utils/JsonExporter';
 
 export interface CometbftConfig {
     home: string;
@@ -46,7 +46,7 @@ export class CometBFTConfigGenerator {
 
     async generateConfig() {
         // execute cometbft init
-        CometbftBinary.executeInit(this.cometbftHome);
+        CometBFTBinary.executeInit(this.cometbftHome);
 
         this.writeMoniker(this.moniker);
 

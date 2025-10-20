@@ -4,7 +4,7 @@ import { confirm, input, select } from '@inquirer/prompts';
 import { NetworksStore, type NetworksFile } from '../services/networksStore';
 import { NodeInfoService } from '../services/nodeInfo';
 import { SafeCommandRunner } from './safeCommandRunner';
-import { NodeInfoFetcher } from '../services/NodeInfoFetcher';
+import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
 
 function isFlag(token?: string): boolean {
     return !!token && token.startsWith('-');

@@ -1,14 +1,14 @@
 import commander from "commander";
-import {InitConfigCommand} from "./node/init";
+import {InitNodeConfigCommand} from "./init";
 
 export class NodeCommand {
     register(program: commander.Command) {
         const nodeCommand = program
             .command('node')
-            .description("Command to handle Carmentis node");
+            .description("Command for Carmentis node");
 
 
         // register additional commands
-        new InitConfigCommand().register(nodeCommand)
+        new InitNodeConfigCommand().register(nodeCommand)
     }
 }

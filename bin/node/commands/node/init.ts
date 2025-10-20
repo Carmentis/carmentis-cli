@@ -3,11 +3,11 @@ import { SafeCommandRunner } from '../safeCommandRunner';
 
 import { InitService } from '../../services/InitService';
 
-export class InitConfigCommand {
+export class InitNodeConfigCommand {
     register(program: commander.Command) {
         program
             .command('init-config')
-            .description('Create a new configuration')
+            .description('Create a new node configuration')
             .option('--home <home>', 'Path to create the configuration')
             .option('--join-network <network>', 'Creates a configuration to join a known network.')
             .option(

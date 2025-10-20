@@ -1,15 +1,15 @@
-import { BinaryHandler } from './binaryHandler';
+import { Binary } from '../utils/Binary';
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
 
-export class CometbftBinary {
+export class CometBFTBinary {
     static isGoInstalled() : boolean {
-        return BinaryHandler.isBinaryAvailable("go");
+        return Binary.isBinaryAvailable("go");
     }
 
     static isCometBFTInstalled(): boolean {
-        return BinaryHandler.isBinaryAvailable("cometbft");
+        return Binary.isBinaryAvailable("cometbft");
     }
 
     static executeInit(home: string, executeInDocker: boolean = true) {
@@ -38,7 +38,7 @@ export class CometbftBinary {
             }
             //BinaryHandler.execute(`docker run -v ${resolvedPath}:/cometbft -u $UID cometbft/cometbft init`, false );
         } else {
-            BinaryHandler.execute(`cometbft init --home ${home}`);
+            Binary.execute(`cometbft init --home ${home}`);
         }
     }
 }

@@ -1,3 +1,5 @@
+import {FileManager} from "./FileManager";
+
 export class FileDownloader {
     private static CADDY_FEATURED_COMPOSE_ENDPOINT = 'https://github.com/Carmentis/architectures/blob/main/node/docker-compose-with-caddy.yml';
     private static CADDYFILE_ENDPOINT = 'https://github.com/Carmentis/architectures/blob/main/node/Caddyfile'
@@ -73,5 +75,14 @@ export class FileDownloader {
 
         // Write file
         await fs.writeFile(path, content, { encoding: 'utf8' });
+    }
+
+    static async downloadAt(url: string, storeAt: string) {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) {
+            throw new Error(`Failed to download ${url}: ${res.status} ${res.statusText}`);
+        }
+        let content = await res.text();
+        await FileManager.writeFile(content, storeAt)
     }
 }

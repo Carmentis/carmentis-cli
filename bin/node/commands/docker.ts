@@ -1,7 +1,7 @@
 import {NetworksStore} from "../services/networksStore";
 import commander from "commander";
 import {SafeCommandRunner} from "./safeCommandRunner";
-import {DockerBinary} from "../services/dockerBinary";
+import {DockerBinary} from "../utils/dockerBinary";
 
 export class DockerCommand {
     constructor() {

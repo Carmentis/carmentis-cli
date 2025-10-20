@@ -8,11 +8,15 @@ export class SafeCommandRunner {
 
     }
 
+    private get shouldRunInDebug() {
+        return process.env.CMTS_DEBUG !== undefined
+    }
+
     async run() {
         try {
             await this.runner();
         } catch (error) {
-            console.error(error);
+            if (this.shouldRunInDebug) console.error(error);
             if (error instanceof Error) {
                 console.error(error.message);
             } else {

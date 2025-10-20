@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import * as querystring from 'node:querystring';
 
-export class BinaryHandler {
+export class Binary {
     static isBinaryAvailable(binary: string): boolean {
         try {
             execSync(`which ${binary}`, { stdio: 'ignore' });

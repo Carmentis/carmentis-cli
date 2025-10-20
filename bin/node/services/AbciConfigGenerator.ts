@@ -1,5 +1,5 @@
 import * as TOML from '@iarna/toml';
-import { TomlExporter } from './tomlExporter';
+import { TomlExporter } from '../utils/TomlExporter';
 import { join } from 'path';
 
 export interface AbciConfigParams {
