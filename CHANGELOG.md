@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/Carmentis/carmentis-cli/compare/v1.3.0...v1.3.1) (2025-10-20)
+
+
+### Bug Fixes
+
+* show deleted directory before to delete ([178c3b3](https://github.com/Carmentis/carmentis-cli/commit/178c3b32803d6851f8c8c25100b4bc89bc2dd3cb))
+
 # [1.3.0](https://github.com/Carmentis/carmentis-cli/compare/v1.2.0...v1.3.0) (2025-10-20)
 
 
