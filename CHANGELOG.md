@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/Carmentis/carmentis-cli/compare/v1.2.0...v1.3.0) (2025-10-20)
+
+
+### Features
+
+* addition of operator config generation ([4dfebdd](https://github.com/Carmentis/carmentis-cli/commit/4dfebdd8f833722f473e06ab6e1241ea69578cbe))
+
 # [1.2.0](https://github.com/Carmentis/carmentis-cli/compare/v1.1.1...v1.2.0) (2025-10-16)
 
 
