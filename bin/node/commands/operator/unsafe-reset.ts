@@ -13,14 +13,16 @@ export class OperatorUnsafeReset {
             .option('-f,--force', 'Force the deletion of the data')
             .action(async (options) =>  {
                 await SafeCommandRunner.safeRun(async () => {
+                    // resolve the current path
+                    const homePath = path.resolve(options.home);
+                    const storagePath = path.join(homePath, 'operator-storage')
+
                     const confirmed = options.force || await confirm({
-                        message: 'Are you sure to proceed?',
+                        message: `Are you sure to delete ${storagePath}?`,
                         default: false
                     });
                     if (confirmed) {
-                        // resolve the current path
-                        const homePath = path.resolve(options.home);
-                        const storagePath = path.join(homePath, 'operator-storage')
+
                         await FileManager.deleteDir(storagePath)
                     } else {
                         console.log('Reset not confirmed, aborting')
