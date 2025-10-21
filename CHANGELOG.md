@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/Carmentis/carmentis-cli/compare/v1.3.1...v1.4.0) (2025-10-21)
+
+
+### Features
+
+* validator (node+operator) supported by the CLI ([04b24d0](https://github.com/Carmentis/carmentis-cli/commit/04b24d0d7842522418f7e372c7e537800d36e879))
+
 ## [1.3.1](https://github.com/Carmentis/carmentis-cli/compare/v1.3.0...v1.3.1) (2025-10-20)
 
 
