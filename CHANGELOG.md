@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/Carmentis/carmentis-cli/compare/v1.4.0...v1.4.1) (2025-10-21)
+
+
+### Bug Fixes
+
+* typos in the config creation success message ([da0a70c](https://github.com/Carmentis/carmentis-cli/commit/da0a70c10453fee0dfbc35d710f8adc53d1af751))
+
 # [1.4.0](https://github.com/Carmentis/carmentis-cli/compare/v1.3.1...v1.4.0) (2025-10-21)
 
 
