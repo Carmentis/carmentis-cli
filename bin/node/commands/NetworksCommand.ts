@@ -1,10 +1,9 @@
 import commander from 'commander';
 import inquirer from 'inquirer';
-import { confirm, input, select } from '@inquirer/prompts';
-import { NetworksStore, type NetworksFile } from '../services/networksStore';
-import { NodeInfoService } from '../services/nodeInfo';
-import { SafeCommandRunner } from './safeCommandRunner';
-import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
+import {confirm} from '@inquirer/prompts';
+import {type NetworksFile, NetworksStore} from '../services/networksStore';
+import {SafeCommandRunner} from './safeCommandRunner';
+import {NodeInfoFetcher} from '../utils/NodeInfoFetcher';
 
 function isFlag(token?: string): boolean {
     return !!token && token.startsWith('-');

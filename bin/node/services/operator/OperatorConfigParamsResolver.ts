@@ -1,32 +1,16 @@
-import commander from "commander";
-import {OperatorConfigGenerator, OperatorInitParams} from "../../services/operator/OperatorConfigGenerator";
+import {OperatorConfigGenerationParams} from "./OperatorConfigGenerator";
 import {input} from "@inquirer/prompts";
 import {EndpointTransformer} from "../../utils/EndpointTransformer";
-import {SafeCommandRunner} from "../safeCommandRunner";
 import {randomBytes} from "node:crypto";
 
-export class OperatorInitCommand {
-    register(program: commander.Command) {
-        program
-            .command('init-config')
-            .description('Create a new operator configuration')
-            .option('--home <home>', 'Path to create the configuration', '.')
-            .option('--workspace-domain-name <workspace-domain-name>', "Domain name of the workspace")
-            .option('--operator-domain-name <operator-domain-name>', "Domain name of the operator")
-            .option('--node-url <node-url>', "Url of the node used by the operator to interact with the chain")
-            .action(async (options) => {
-                await SafeCommandRunner.safeRun(async () => {
-                    // asks for missing information
-                    const params = await this.generateOperatorConfigGeneratorParams(options);
-                    const generator = new OperatorConfigGenerator(params);
-                    await generator.generateConfig();
-                })
-            })
-        ;
-    }
-
-    private async generateOperatorConfigGeneratorParams(options: any) {
-        const config: OperatorInitParams = {
+export class OperatorConfigParamsResolver {
+    /**
+     * This method is used to convert the provided initial inputs (obtained by command line arguments) and to complete
+     * the params.
+     * @param options
+     */
+    static async resolveParams(options: any) {
+        const config: OperatorConfigGenerationParams = {
             nodeUrl: await this.askNodeUrl(options.nodeUrl),
             allowEncryptionKeyGeneration: true,
             downloadEndpoints:  {
@@ -47,29 +31,36 @@ export class OperatorInitCommand {
                 user: "postgres"
             },
             generateAt: options.home,
-            operatorHome: '/operator' // Docker-specific,
+            operatorHome: '/operator', // Docker-specific,
+            filenames: {
+                operatorConfigFilename: 'config.toml'
+            },
+            shouldDownload: {
+                dockerCompose: true,
+                caddyfile: true
+            }
         }
         return config;
     }
 
-    private askNodeUrl(providedNodeUrl?: string) {
+    private static askNodeUrl(providedNodeUrl?: string) {
         return providedNodeUrl || input({
             message: 'Enter the node RPC endpoint used by the operator to interact with the chain',
             validate: (value: string) => new EndpointTransformer(value).isHttpOrHttpsEndpoint(),
         })
     }
 
-    private generateDatabasePassword() {
+    private static  generateDatabasePassword() {
         return randomBytes(32).toString("hex");
     }
 
-    private async askWorkspaceDomainName(providedDomainName?: string) {
+    private static async askWorkspaceDomainName(providedDomainName?: string) {
         return providedDomainName || input({
             message: 'Enter the domain name of the workspace',
         })
     }
 
-    private async askOperatorDomainName(providedDomainName?: string) {
+    private static async askOperatorDomainName(providedDomainName?: string) {
         return providedDomainName || input({
             message: 'Enter the domain name of the operator',
         })

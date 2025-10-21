@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { KeygenCommand } from './commands/keygen';
-import { NetworksCommand } from './commands/networks';
+import { KeygenCommand } from './commands/KeygenCommand';
+import { NetworksCommand } from './commands/NetworksCommand';
 import { Command } from 'commander';
-import {NodeCommand} from "./commands/node/node";
-import {DockerCommand} from "./commands/docker";
-import {OperatorInitCommand} from "./commands/operator/init";
-import {OperatorCommand} from "./commands/operator/operator";
+import {NodeCommand} from "./commands/node/NodeCommand";
+import {DockerCommand} from "./commands/DockerCommand";
+import {OperatorInitCommand} from "./commands/operator/OperatorInitConfigCommand";
+import {OperatorCommand} from "./commands/operator/OperatorCommand";
+import {ValidatorCommand} from "./commands/validator/ValidatorCommand";
 
 const bootstrap = async () => {
     // create the description of the binary
@@ -13,9 +14,10 @@ const bootstrap = async () => {
     program.name('Carmentis CLI').description('CLI for Carmentis');
 
     // register top-level commands
-    new NodeCommand().register(program);
-    new OperatorCommand().register(program);
-    new KeygenCommand().register(program);
+    NodeCommand.register(program);
+    ValidatorCommand.register(program);
+    OperatorCommand.register(program);
+    KeygenCommand.register(program);
     new NetworksCommand().register(program);
     new DockerCommand().register(program);
 

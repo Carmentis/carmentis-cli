@@ -6,15 +6,17 @@ import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
 import { JsonEditor } from '../utils/JsonEditor';
 import { JsonExporter } from '../utils/JsonExporter';
 
+export interface CometBFTStateSync {
+    enabled: boolean;
+    trustHeight: number;
+    trustHash: string;
+}
 export interface CometbftConfig {
     home: string;
     moniker: string;
     endpoints: CometBFTEndpointAccumulator,
     genesis: { overrideWith?: object, networkName?: string },
-    stateSync: {
-        enabled?: boolean;
-        trustHeight?: number | 'last',
-    },
+    stateSync?: CometBFTStateSync,
     cors: {
         allowedOrigins: string[],
     },
@@ -25,7 +27,6 @@ export interface CometbftConfig {
 }
 
 export class CometBFTConfigGenerator {
-    private trustHeight: 'last' | number = 'last';
     private configTomlEditor: TomlEditor;
     private genesisEditor: JsonEditor;
 
@@ -34,14 +35,6 @@ export class CometBFTConfigGenerator {
     ) {
         this.configTomlEditor = new TomlEditor(this.configFilePath);
         this.genesisEditor = new JsonEditor(this.genesisPath);
-    }
-
-    /**
-     * Indicates the method to use to recover the trust height and hash.
-     * @param method
-     */
-    setStateSyncTrustHeight(method: number | 'last') {
-        this.trustHeight = method;
     }
 
     async generateConfig() {
@@ -74,39 +67,13 @@ export class CometBFTConfigGenerator {
         const rpcServers = this.endpoints.getRpcEndpoints();
         this.writeCors(this.params.cors.allowedOrigins);
 
-        if (rpcServers.length >= 2) {
-            // if the provided trust height is 'last', use the first servers
-            const chosenRpcServer = rpcServers[0];
-            const fetcher = new NodeInfoFetcher(chosenRpcServer);
-            let trustHeight, trustHash;
-            if (this.trustHeight === 'last') {
-                const response = await fetcher.fetchLastHeightAndHash();
-                if (response !== undefined) {
-                    const {
-                        latest_block_hash,
-                        latest_block_height
-                    } = response;
-                    trustHeight = latest_block_height;
-                    trustHash = latest_block_hash;
-                }
-            } else {
-                const response = await fetcher.fetchHashFromHeight(this.trustHeight);
-                if (response !== undefined) {
-                    const {
-                        block_height,
-                        block_hash
-                    } = response;
-                    trustHash = block_hash;
-                    trustHeight = block_height;
-                }
-            }
-            if (trustHeight !== undefined && trustHash !== undefined) {
-                this.enableRpcServers(rpcServers, trustHeight, trustHash);
-            } else {
-                throw new Error("Undefined trust height")
-            }
+        const hasEnoughRPCServers = rpcServers.length >= 2;
+        const isStateSyncEnabled = this.params.stateSync !== undefined && this.params.stateSync.enabled;
+        if (hasEnoughRPCServers && isStateSyncEnabled && this.params.stateSync !== undefined) {
+            const { trustHeight, trustHash } = this.params.stateSync;
+            this.enableRpcServers(rpcServers, trustHeight, trustHash);
         } else {
-            console.warn(`No sufficient RPC servers provided (${rpcServers.length} provided), cannot enable fastsync`);
+            console.warn(`No sufficient RPC servers provided (${rpcServers.length} provided) or state sync not enabled: state sync disabled`);
         }
     }
 
@@ -115,19 +82,15 @@ export class CometBFTConfigGenerator {
     }
 
     private enableRpcServers(rpcServers: string[], trustHeight: number, trustHash: string) {
-        const enableStateSync = typeof this.params.stateSync.enabled === 'boolean' && this.params.stateSync.enabled;
-        if (enableStateSync) {
-            const rpcServersConfig = rpcServers.join(",")
-            this.configTomlEditor.write("enable", enableStateSync, "statesync");
-            this.configTomlEditor.write("rpc_servers", rpcServersConfig, 'statesync');
-            this.configTomlEditor.write("trust_height", trustHeight, 'statesync');
-            this.configTomlEditor.write("trust_hash", trustHash, 'statesync');
-        }
-
+        const rpcServersConfig = rpcServers.join(",")
+        this.configTomlEditor.write("enable", true, "statesync");
+        this.configTomlEditor.write("rpc_servers", rpcServersConfig, 'statesync');
+        this.configTomlEditor.write("trust_height", trustHeight, 'statesync');
+        this.configTomlEditor.write("trust_hash", trustHash, 'statesync');
     }
 
     private writeMoniker(moniker: string) {
-        this.configTomlEditor.write("moniker", this.moniker);
+        this.configTomlEditor.write("moniker", moniker);
     }
 
     private get moniker() {

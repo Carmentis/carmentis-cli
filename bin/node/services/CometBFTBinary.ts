@@ -2,6 +2,7 @@ import { Binary } from '../utils/Binary';
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
+import {FileManager} from "../utils/FileManager";
 
 export class CometBFTBinary {
     static isGoInstalled() : boolean {
@@ -17,8 +18,9 @@ export class CometBFTBinary {
             // we ensure the provided home is a folder (or create it if not exists)
             const resolvedPath = path.resolve(home);
             if (!fs.existsSync(resolvedPath)) {
-                fs.mkdirSync(resolvedPath, { recursive: true });
-                console.log(`📁 Folder created : ${resolvedPath}`);
+                FileManager.ensureDirExistsOrCreate(resolvedPath);
+                //fs.mkdirSync(resolvedPath, { recursive: true });
+                //console.log(`📁 Folder created : ${resolvedPath}`);
             }
 
             const dockerArgs = [

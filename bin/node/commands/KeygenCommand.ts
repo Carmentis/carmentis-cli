@@ -1,17 +1,17 @@
 import * as fs from 'node:fs/promises';
-import { dirname } from 'node:path';
+import {dirname} from 'node:path';
 import inquirer from 'inquirer';
 import commander from 'commander';
 import {
     HCVSignatureEncoder,
-    Secp256k1PrivateSignatureKey,
     MLDSA65PrivateSignatureKey,
-    SignatureAlgorithmId,
     type PrivateSignatureKey,
+    Secp256k1PrivateSignatureKey,
+    SignatureAlgorithmId,
 } from '@cmts-dev/carmentis-sdk/client';
 
 export class KeygenCommand {
-    register(program: commander.Command) {
+    static register(program: commander.Command) {
         program
             .command('keygen')
             .description('Generate a signing key pair and export it to a file.')
@@ -21,7 +21,7 @@ export class KeygenCommand {
             .action(async (options) => this.run(options).catch((e) => this.handleError(e)));
     }
 
-    private async run(options: { output: string; format: string; type: string }) {
+    private static async run(options: { output: string; format: string; type: string }) {
         const format = (options.format || 'json').toLowerCase();
         const type = (options.type || 'secp256k1').toLowerCase();
         if (format !== 'json') {
@@ -86,7 +86,7 @@ export class KeygenCommand {
         }
     }
 
-    private handleError(e: any) {
+    private static handleError(e: any) {
         console.error(e?.message ?? String(e));
         process.exit(1);
     }

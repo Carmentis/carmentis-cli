@@ -5,7 +5,7 @@ import {FileDownloader} from "../../utils/FileDownloader";
 import {TomlExporter} from "../../utils/TomlExporter";
 import {DotEnvExporter} from "../../utils/DotEnvExporter";
 
-export interface OperatorInitParams {
+export interface OperatorConfigGenerationParams {
     generateAt: string,
     operatorHome: string,
     nodeUrl: string,
@@ -27,11 +27,18 @@ export interface OperatorInitParams {
         password: string,
         useDockerSecret: boolean,
     },
+    filenames: {
+        operatorConfigFilename: string,
+    },
+    shouldDownload: {
+        dockerCompose: boolean,
+        caddyfile: boolean,
+    }
 
 }
 
 export class OperatorConfigGenerator {
-    constructor(private readonly params: OperatorInitParams) {}
+    constructor(private readonly params: OperatorConfigGenerationParams) {}
 
     async generateConfig() {
         // we start by resolving the current path from which we deduce all relative paths
@@ -39,13 +46,22 @@ export class OperatorConfigGenerator {
         const dockerComposePath = join(generationPath, `docker-compose.yml`);
         const caddyFilePath = join(generationPath, `Caddyfile`);
         const dotEnvPath = join(generationPath, `.env`);
-        const operatorConfigPath = join(generationPath, 'config.toml');
+        const operatorConfigPath = join(generationPath, this.params.filenames.operatorConfigFilename);
 
 
         // we create the folder if not already exists and download the required files
-        await FileManager.ensureDirExistsOrCreate(generationPath);
-        await FileDownloader.downloadAt( this.dockerComposeEndpoint, dockerComposePath );
-        await FileDownloader.downloadAt( this.caddyFileEndpoint, caddyFilePath );
+        FileManager.ensureDirExistsOrCreate(generationPath);
+        if (this.params.shouldDownload.dockerCompose) {
+            await FileDownloader.downloadAt( this.dockerComposeEndpoint, dockerComposePath );
+        }
+
+        // we conditionally generate and update the caddyfile
+        const { workspace: workspaceDomainName, operator: operatorDomainName } = this.params.domainNames;
+        if (this.params.shouldDownload.caddyfile) {
+            await FileDownloader.downloadAt( this.caddyFileEndpoint, caddyFilePath );
+            await FileManager.replaceInFile(caddyFilePath, 'operator.your-domain-name', operatorDomainName);
+            await FileManager.replaceInFile(caddyFilePath, 'workspace.your-domain-name', workspaceDomainName);
+        }
 
         // we generate the config.toml file
         await TomlExporter.exportToFile({
@@ -70,7 +86,6 @@ export class OperatorConfigGenerator {
         }, operatorConfigPath)
 
         // we generate the .env file
-        const { workspace: workspaceDomainName, operator: operatorDomainName } = this.params.domainNames;
         await DotEnvExporter.exportToFile({
             OPERATOR_URL: operatorDomainName,
             POSTGRES_USER: this.params.database.user,
@@ -78,9 +93,7 @@ export class OperatorConfigGenerator {
             POSTGRES_PASSWORD: this.params.database.password
         }, dotEnvPath)
 
-        // update the Caddyfile with the operator and workspace domain names
-        await FileManager.replaceInFile(caddyFilePath, 'operator.your-domain-name', operatorDomainName);
-        await FileManager.replaceInFile(caddyFilePath, 'workspace.your-domain-name', workspaceDomainName);
+
 
     }
 

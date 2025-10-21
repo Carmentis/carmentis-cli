@@ -52,7 +52,7 @@ export class EndpointTransformer {
         return this.transformEndpointFromHostname('https', EndpointTransformer.DEFAULT_P2P_PORT);
     }
 
-    extractHostname() {
+    extractDomainName() {
         const url = new URL(this.endpoint);
         const hostname = url.hostname;
         return hostname

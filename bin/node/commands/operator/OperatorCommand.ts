@@ -1,17 +1,17 @@
 import commander from "commander";
-import {OperatorInitCommand} from "./init";
-import {OperatorTokenCommand} from "./token";
-import {OperatorUnsafeReset} from "./unsafe-reset";
+import {OperatorInitCommand} from "./OperatorInitConfigCommand";
+import {OperatorTokenCommand} from "./OperatorTokenCommand";
+import {OperatorUnsafeReset} from "./OperatorUnsafeResetCommand";
 
 export class OperatorCommand {
-    register(program: commander.Command) {
+    static register(program: commander.Command) {
         const nodeCommand = program
             .command('operator')
             .description("Commands for operator.");
 
 
         // register additional commands
-        new OperatorInitCommand().register(nodeCommand)
+        OperatorInitCommand.register(nodeCommand)
         new OperatorTokenCommand().register(nodeCommand)
         new OperatorUnsafeReset().register(nodeCommand)
     }

@@ -5,12 +5,14 @@ import { join } from 'path';
 export interface AbciConfigParams {
     home: string,
     exposedRpcEndpoint: string,
+    exposedRpcDomainName: string,
     genesis?: {
         sk: string,
     },
     genesis_snapshot?: {
         fromRpcEndpoint: string,
     },
+    nodeConfigFilename: string;
 }
 export class AbciConfigGenerator {
 
@@ -63,7 +65,7 @@ export class AbciConfigGenerator {
         }
 
         // export the config
-        const configFilePath = join(this.home, 'config.toml');
+        const configFilePath = join(this.home, this.params.nodeConfigFilename);
         await TomlExporter.exportToFile(config, configFilePath);
     }
 
