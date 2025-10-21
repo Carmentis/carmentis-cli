@@ -67,7 +67,7 @@ export class ValidatorInitConfigCommand {
 
                     // show the result message
                     const home = options.home;
-                    console.log(`Congrats, your node configuration has been created at ${home}!`);
+                    console.log(`Congrats, your validator configuration has been created at ${home}!`);
                 })
             })
         ;

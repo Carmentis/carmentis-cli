@@ -18,7 +18,7 @@ export class OperatorInitCommand {
 
                     // show the result message
                     const home = params.operatorHome;
-                    console.log(`Congrats, your node configuration has been created at ${home}!`);
+                    console.log(`Congrats, your operator configuration has been created at ${home}!`);
                 })
             })
         ;
