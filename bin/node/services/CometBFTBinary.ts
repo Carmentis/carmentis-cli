@@ -28,7 +28,7 @@ export class CometBFTBinary {
                 '--rm',
                 '-v', `${resolvedPath}:/cometbft`,
                 '-u', "1000",
-                'cometbft/cometbft',
+                'cometbft/cometbft:v1.x',
                 'init'
             ];
 
