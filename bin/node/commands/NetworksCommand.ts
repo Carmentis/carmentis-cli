@@ -4,6 +4,8 @@ import {confirm} from '@inquirer/prompts';
 import {type NetworksFile, NetworksStore} from '../services/networksStore';
 import {SafeCommandRunner} from './safeCommandRunner';
 import {NodeInfoFetcher} from '../utils/NodeInfoFetcher';
+import {FileManager} from '../utils/FileManager';
+import path from 'node:path';
 
 function isFlag(token?: string): boolean {
     return !!token && token.startsWith('-');
@@ -42,11 +44,25 @@ export class NetworksCommand {
 
         networks
             .command('add-node <network>')
-            .requiredOption("--hostname <hostname>")
-            .requiredOption("--rpc <rpcEndpoint>")
-            .requiredOption("--p2p <p2pEndpoint>")
-            .option("-t|--trust", "Trust this node", false)
-            .description('Add a node in the network')
+            .requiredOption("--hostname <hostname>", "Node hostname (e.g., node1.example.com)")
+            .requiredOption("--rpc <rpc>", "RPC endpoint with protocol (e.g., https://rpc.example.com or http://node.example.com:26657)")
+            .requiredOption("--p2p <p2p>", "P2P endpoint without protocol (e.g., p2p.example.com:26656)")
+            .option("-t|--trust", "Trust this node (recommended for official nodes)", false)
+            .description(`Add a node in the network
+
+Standard Carmentis node configuration:
+  • HTTP port 26657 for RPC (e.g., http://node.example.com:26657)
+  • Port 26656 for P2P (e.g., node.example.com:26656)
+  • RPC can also be accessed via reverse proxy (e.g., https://ares.testnet.carmentis.io)
+  • Using ports directly is generally considered safe
+
+Trust option:
+  • Currently not enforced but may be used in the future to restrict network joins to official nodes
+  • It is recommended to mark official/trusted nodes with --trust
+
+Examples:
+  cmts networks add-node testnet --hostname node1 --rpc http://node1.example.com:26657 --p2p node1.example.com:26656
+  cmts networks add-node testnet --hostname ares --rpc https://ares.testnet.carmentis.io --p2p ares.testnet.carmentis.io:26656 --trust`)
             .action(async (network, options) => {
                 await SafeCommandRunner.safeRun(() => this.addNode(network, options.hostname, options.rpc, options.p2p, options.trust));
             });
@@ -83,8 +99,9 @@ export class NetworksCommand {
             .command('import')
             .description('Export the networks')
             .option('-s|--source', 'Source to download the networks', 'https://assets.carmentis.io/networks.json')
+            .option('--from-file <filename>', 'Read networks from a local JSON file')
             .action(async (options) => {
-                await SafeCommandRunner.safeRun(() => this.importNetworks(options.source));
+                await SafeCommandRunner.safeRun(() => this.importNetworks(options.source, options.fromFile));
             });
 
         networks
@@ -105,20 +122,29 @@ export class NetworksCommand {
             });
     }
 
-    private async importNetworks(source?: string) {
-        const networksEndpoint = source || "https://assets.carmentis.io/networks.json";
-        console.log(`Fetching networks from ${networksEndpoint}...`);
-
+    private async importNetworks(source?: string, fromFile?: string) {
         // Read local file
         const localNetworks: NetworksFile = (await this.store.read()) || {};
 
-        try {
-            const response = await fetch(networksEndpoint);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch networks: ${response.statusText}`);
-            }
+        let remoteNetworks: NetworksFile;
 
-            const remoteNetworks: NetworksFile = await response.json();
+        try {
+            if (fromFile) {
+                // Read from local file
+                const filePath = path.resolve(fromFile);
+                console.log(`Reading networks from file ${filePath}...`);
+                const fileContent = await FileManager.readFile(filePath);
+                remoteNetworks = JSON.parse(fileContent);
+            } else {
+                // Fetch from URL
+                const networksEndpoint = source || "https://assets.carmentis.io/networks.json";
+                console.log(`Fetching networks from ${networksEndpoint}...`);
+                const response = await fetch(networksEndpoint);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch networks: ${response.statusText}`);
+                }
+                remoteNetworks = await response.json();
+            }
 
             // Merge logic
             for (const [networkName, remoteNetwork] of Object.entries(remoteNetworks)) {
