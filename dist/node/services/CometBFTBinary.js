@@ -30,7 +30,7 @@ class CometBFTBinary {
                 '--rm',
                 '-v', `${resolvedPath}:/cometbft`,
                 '-u', "1000",
-                'cometbft/cometbft',
+                'cometbft/cometbft:v1.x',
                 'init'
             ];
             const result = (0, child_process_1.spawnSync)('docker', dockerArgs, { stdio: 'inherit' });

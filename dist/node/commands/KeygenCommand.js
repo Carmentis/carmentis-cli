@@ -58,25 +58,25 @@ class KeygenCommand {
             console.error(`Unsupported format: ${options.format}. Only "json" is supported at the moment.`);
             process.exit(1);
         }
-        const encoder = client_1.HCVSignatureEncoder.createHexHCVSignatureEncoder();
+        const encoder = client_1.CryptoEncoderFactory.defaultStringSignatureEncoder();
         let sk;
         let scheme;
         if (type === 'secp256k1') {
             sk = client_1.Secp256k1PrivateSignatureKey.gen();
-            scheme = client_1.SignatureAlgorithmId.SECP256K1;
+            scheme = client_1.SignatureSchemeId.SECP256K1;
         }
         else if (type === 'mldsa') {
-            sk = client_1.MLDSA65PrivateSignatureKey.gen();
-            scheme = client_1.SignatureAlgorithmId.ML_DSA_65;
+            sk = await client_1.MLDSA65PrivateSignatureKey.gen();
+            scheme = client_1.SignatureSchemeId.ML_DSA_65;
         }
         else {
             console.error(`Unknown key type: ${options.type}. Use "secp256k1" or "mldsa".`);
             process.exit(1);
         }
-        const pk = sk.getPublicKey();
+        const pk = await sk.getPublicKey();
         const outJson = {
-            privateKey: encoder.encodePrivateKey(sk),
-            publicKey: encoder.encodePublicKey(pk),
+            privateKey: await encoder.encodePrivateKey(sk),
+            publicKey: await encoder.encodePublicKey(pk),
         };
         const outPath = options.output;
         if (outPath) {

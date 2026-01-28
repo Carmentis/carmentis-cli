@@ -23,7 +23,7 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@cmts-dev/carmentis-sdk": "^1.13.3",
+    "@cmts-dev/carmentis-sdk": "^1.18.1",
     "@iarna/toml": "^2.2.5",
     "commander": "^14.0.1",
     "inquirer": "^12.10.0"

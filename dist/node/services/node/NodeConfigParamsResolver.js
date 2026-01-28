@@ -201,7 +201,7 @@ class NodeConfigParamsResolver {
                 message: 'Enter the private key used to generate the genesis state',
                 required: true,
                 validate: (value) => {
-                    const encoder = client_1.StringSignatureEncoder.defaultStringSignatureEncoder();
+                    const encoder = client_1.CryptoEncoderFactory.defaultStringSignatureEncoder();
                     try {
                         encoder.decodePrivateKey(value);
                         return true;

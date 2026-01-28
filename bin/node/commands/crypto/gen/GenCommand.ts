@@ -1,5 +1,5 @@
 import commander from "commander";
-import {CryptoEncoderFactory, SignatureSchemeId, WalletCrypto} from "../../../../../../carmentis-core";
+import {CryptoEncoderFactory, SignatureSchemeId, WalletCrypto} from "@cmts-dev/carmentis-sdk/client";
 
 export class GenCommand {
     static register(program: commander.Command) {
@@ -21,9 +21,9 @@ export class GenCommand {
                 const walletCrypto = WalletCrypto.parseFromString(options.fromSeed);
                 const sigEncoder = CryptoEncoderFactory.defaultStringSignatureEncoder();
                 const walletPrivateKey = walletCrypto.getPrivateSignatureKey(SignatureSchemeId.SECP256K1);
-                const walletPublicKey = walletPrivateKey.getPublicKey();
-                console.log(sigEncoder.encodePrivateKey(walletPrivateKey));
-                console.log(sigEncoder.encodePublicKey(walletPublicKey));
+                const walletPublicKey = await walletPrivateKey.getPublicKey();
+                console.log(await sigEncoder.encodePrivateKey(walletPrivateKey));
+                console.log(await sigEncoder.encodePublicKey(walletPublicKey));
             });
 
         genCommand.command('account-sig')
@@ -34,10 +34,10 @@ export class GenCommand {
                 const walletCrypto = WalletCrypto.parseFromString(options.fromSeed);
                 const accountCrypto = walletCrypto.getAccount(Number.parseInt(options.nonce));
                 const sigEncoder = CryptoEncoderFactory.defaultStringSignatureEncoder();
-                const accountPrivateKey = accountCrypto.getPrivateSignatureKey(SignatureSchemeId.SECP256K1);
-                const accountPublicKey = accountPrivateKey.getPublicKey();
-                console.log(sigEncoder.encodePrivateKey(accountPrivateKey));
-                console.log(sigEncoder.encodePublicKey(accountPublicKey));
+                const accountPrivateKey = await accountCrypto.getPrivateSignatureKey(SignatureSchemeId.SECP256K1);
+                const accountPublicKey = await accountPrivateKey.getPublicKey();
+                console.log(await sigEncoder.encodePrivateKey(accountPrivateKey));
+                console.log(await sigEncoder.encodePublicKey(accountPublicKey));
             });
     }
 }

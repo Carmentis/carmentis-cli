@@ -19,8 +19,6 @@ export class CometBFTBinary {
             const resolvedPath = path.resolve(home);
             if (!fs.existsSync(resolvedPath)) {
                 FileManager.ensureDirExistsOrCreate(resolvedPath);
-                //fs.mkdirSync(resolvedPath, { recursive: true });
-                //console.log(`📁 Folder created : ${resolvedPath}`);
             }
 
             const dockerArgs = [
@@ -28,7 +26,7 @@ export class CometBFTBinary {
                 '--rm',
                 '-v', `${resolvedPath}:/cometbft`,
                 '-u', "1000",
-                'cometbft/cometbft:v1.x',
+                'cometbft/cometbft:v0.38.x',
                 'init'
             ];
 

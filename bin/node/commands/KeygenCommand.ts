@@ -3,11 +3,11 @@ import {dirname} from 'node:path';
 import inquirer from 'inquirer';
 import commander from 'commander';
 import {
-    HCVSignatureEncoder,
+    CryptoEncoderFactory,
     MLDSA65PrivateSignatureKey,
     type PrivateSignatureKey,
     Secp256k1PrivateSignatureKey,
-    SignatureAlgorithmId,
+    SignatureSchemeId,
 } from '@cmts-dev/carmentis-sdk/client';
 
 export class KeygenCommand {
@@ -31,27 +31,27 @@ export class KeygenCommand {
             process.exit(1);
         }
 
-        const encoder = HCVSignatureEncoder.createHexHCVSignatureEncoder();
+        const encoder = CryptoEncoderFactory.defaultStringSignatureEncoder();
 
         let sk: PrivateSignatureKey;
-        let scheme: SignatureAlgorithmId;
+        let scheme: SignatureSchemeId;
 
         if (type === 'secp256k1') {
             sk = Secp256k1PrivateSignatureKey.gen();
-            scheme = SignatureAlgorithmId.SECP256K1;
+            scheme = SignatureSchemeId.SECP256K1;
         } else if (type === 'mldsa') {
-            sk = MLDSA65PrivateSignatureKey.gen();
-            scheme = SignatureAlgorithmId.ML_DSA_65;
+            sk = await MLDSA65PrivateSignatureKey.gen();
+            scheme = SignatureSchemeId.ML_DSA_65;
         } else {
             console.error(`Unknown key type: ${options.type}. Use "secp256k1" or "mldsa".`);
             process.exit(1);
         }
 
-        const pk = sk.getPublicKey();
+        const pk = await sk.getPublicKey();
 
         const outJson = {
-            privateKey: encoder.encodePrivateKey(sk),
-            publicKey: encoder.encodePublicKey(pk),
+            privateKey: await encoder.encodePrivateKey(sk),
+            publicKey: await encoder.encodePublicKey(pk),
         } as const;
 
         const outPath = options.output;

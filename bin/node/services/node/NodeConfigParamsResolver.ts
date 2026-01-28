@@ -1,7 +1,7 @@
 import { NodeConfigGenerationParams} from "./NodeConfigGenerator";
 import {confirm} from "@inquirer/prompts";
 import {input, select} from "@inquirer/prompts";
-import {StringSignatureEncoder} from "@cmts-dev/carmentis-sdk/client";
+import {CryptoEncoderFactory} from "@cmts-dev/carmentis-sdk/client";
 import {EndpointTransformer} from "../../utils/EndpointTransformer";
 import path from "node:path";
 import {CometBFTEndpointAccumulator} from "../cometBFTEndpointAccumulator";
@@ -237,7 +237,7 @@ export class NodeConfigParamsResolver {
                 message: 'Enter the private key used to generate the genesis state',
                 required: true,
                 validate: (value: string) => {
-                    const encoder = StringSignatureEncoder.defaultStringSignatureEncoder();
+                    const encoder = CryptoEncoderFactory.defaultStringSignatureEncoder();
                     try {
                         encoder.decodePrivateKey(value);
                         return true;
