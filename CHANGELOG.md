@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/Carmentis/carmentis-cli/compare/v1.4.1...v1.5.0) (2026-01-28)
+
+
+### Bug Fixes
+
+* invalid cometbft docker image used to generate the config ([8bafc69](https://github.com/Carmentis/carmentis-cli/commit/8bafc692f0e2f65ce4de07e401796b1ea000e5c2))
+
+
+### Features
+
+* upgrade of the CLI to use CometBFT 0.38 + minor fixs to match SDK 1.18.1 ([4a7e37f](https://github.com/Carmentis/carmentis-cli/commit/4a7e37f0ba606687fb2e1dede6d639f23fffeffd))
+* wallet crypto ([3c53815](https://github.com/Carmentis/carmentis-cli/commit/3c53815e2e1a5f7e2a4635ab903f7d9efafb7b09))
+
 ## [1.4.1](https://github.com/Carmentis/carmentis-cli/compare/v1.4.0...v1.4.1) (2025-10-21)
 
 

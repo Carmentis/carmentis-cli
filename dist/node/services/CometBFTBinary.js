@@ -22,15 +22,13 @@ class CometBFTBinary {
             const resolvedPath = path_1.default.resolve(home);
             if (!fs_1.default.existsSync(resolvedPath)) {
                 FileManager_1.FileManager.ensureDirExistsOrCreate(resolvedPath);
-                //fs.mkdirSync(resolvedPath, { recursive: true });
-                //console.log(`📁 Folder created : ${resolvedPath}`);
             }
             const dockerArgs = [
                 'run',
                 '--rm',
                 '-v', `${resolvedPath}:/cometbft`,
                 '-u', "1000",
-                'cometbft/cometbft:v1.x',
+                'cometbft/cometbft:v0.38.x',
                 'init'
             ];
             const result = (0, child_process_1.spawnSync)('docker', dockerArgs, { stdio: 'inherit' });
