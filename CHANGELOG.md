@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/Carmentis/carmentis-cli/compare/v1.7.0...v1.7.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* specify argument type for filter option in networks export command ([2df3267](https://github.com/Carmentis/carmentis-cli/commit/2df32674c45c4f4e6d91e0057ba03ec5ac12f44d))
+
 # [1.7.0](https://github.com/Carmentis/carmentis-cli/compare/v1.6.0...v1.7.0) (2026-01-28)
 
 
