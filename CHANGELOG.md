@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/Carmentis/carmentis-cli/compare/v1.6.0...v1.7.0) (2026-01-28)
+
+
+### Features
+
+* add convert-token command and improve network management in CLI ([8e8b116](https://github.com/Carmentis/carmentis-cli/commit/8e8b11630fb29055c5e8e8767c8b177fabfc5142))
+
 # [1.6.0](https://github.com/Carmentis/carmentis-cli/compare/v1.5.0...v1.6.0) (2026-01-28)
 
 
