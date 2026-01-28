@@ -8,6 +8,7 @@ import {OperatorInitCommand} from "./commands/operator/OperatorInitConfigCommand
 import {OperatorCommand} from "./commands/operator/OperatorCommand";
 import {ValidatorCommand} from "./commands/validator/ValidatorCommand";
 import {CryptoCommand} from "./commands/crypto/CryptoCommand";
+import {UnsafeBetaCommand} from "./commands/unsafe-beta/UnsafeBetaCommand";
 
 const bootstrap = async () => {
     // create the description of the binary
@@ -22,6 +23,7 @@ const bootstrap = async () => {
     new NetworksCommand().register(program);
     new DockerCommand().register(program);
     CryptoCommand.register(program);
+    UnsafeBetaCommand.register(program);
 
     program.parse(process.argv);
 };
