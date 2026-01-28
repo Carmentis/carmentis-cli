@@ -107,7 +107,7 @@ Examples:
         networks
             .command('export')
             .description('Export the networks')
-            .option("-f|--filter", "Filter networks")
+            .option("-f|--filter <filter>", "Filter networks")
             .action(async (options) => {
                 await SafeCommandRunner.safeRun(() => this.exportNetworks(options.filter));
             });
