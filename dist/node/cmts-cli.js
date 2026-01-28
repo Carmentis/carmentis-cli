@@ -9,6 +9,7 @@ const DockerCommand_1 = require("./commands/DockerCommand");
 const OperatorCommand_1 = require("./commands/operator/OperatorCommand");
 const ValidatorCommand_1 = require("./commands/validator/ValidatorCommand");
 const CryptoCommand_1 = require("./commands/crypto/CryptoCommand");
+const UnsafeBetaCommand_1 = require("./commands/unsafe-beta/UnsafeBetaCommand");
 const bootstrap = async () => {
     // create the description of the binary
     const program = new commander_1.Command("cmts");
@@ -21,6 +22,7 @@ const bootstrap = async () => {
     new NetworksCommand_1.NetworksCommand().register(program);
     new DockerCommand_1.DockerCommand().register(program);
     CryptoCommand_1.CryptoCommand.register(program);
+    UnsafeBetaCommand_1.UnsafeBetaCommand.register(program);
     program.parse(process.argv);
 };
 bootstrap();

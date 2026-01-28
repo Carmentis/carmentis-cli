@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/Carmentis/carmentis-cli/compare/v1.5.0...v1.6.0) (2026-01-28)
+
+
+### Features
+
+* add unsafe-beta commands for ABCI config and Docker Compose generation in the CLI ([a5cf733](https://github.com/Carmentis/carmentis-cli/commit/a5cf733a17049c5ca3108e9b4cefd1086bdb2eb6))
+
 # [1.5.0](https://github.com/Carmentis/carmentis-cli/compare/v1.4.1...v1.5.0) (2026-01-28)
 
 
