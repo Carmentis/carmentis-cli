@@ -23,6 +23,9 @@ export interface CometbftConfig {
     proxyApp: string,
     rpc: {
         laddr: string,
+    },
+    mempool: {
+        createEmptyBlocksInterval?: string,
     }
 }
 
@@ -46,6 +49,10 @@ export class CometBFTConfigGenerator {
         // update proxy app
         this.configTomlEditor.write("proxy_app", this.params.proxyApp)
         this.configTomlEditor.write("laddr", this.params.rpc.laddr,"rpc")
+
+        // update empty block interval
+        const createEmptyBlocksInterval = this.params.mempool.createEmptyBlocksInterval ?? '30s';
+        this.configTomlEditor.write("create_empty_blocks_interval", createEmptyBlocksInterval, "mempool");
 
         // update persistent peers
         const p2pEndpoints = this.endpoints.getP2PEndpoints();
