@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/Carmentis/carmentis-cli/compare/v1.10.0...v1.10.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* update docker command in NodeResetCommand to specify user and correct image version ([7e0d3de](https://github.com/Carmentis/carmentis-cli/commit/7e0d3de6af71a7d2940f3af17ced27014e18dd11))
+
 # [1.10.0](https://github.com/Carmentis/carmentis-cli/compare/v1.9.1...v1.10.0) (2026-02-03)
 
 
