@@ -13,6 +13,7 @@ export interface NetworksFile {
                 rpcEndpoint: string;
                 p2pEndpoint: string;
                 trusted?: boolean;
+                isSeed?: boolean;
                 nodeId: string;
             };
         };
@@ -70,7 +71,7 @@ export class NetworksStore {
         return true;
     }
 
-    async addNode(network: string, hostname: string, rpcEndpoint: string, p2pEndpoint: string, trusted: boolean = true): Promise<void> {
+    async addNode(network: string, hostname: string, rpcEndpoint: string, p2pEndpoint: string, trusted: boolean = true, isSeed: boolean = false): Promise<void> {
         const store = await this.read();
         const n = store[network];
         if (!n) throw new Error(`Network "${network}" does not exist.`);
@@ -82,7 +83,7 @@ export class NetworksStore {
         try {
             const nodeId = await fetcher.extractNodeId();
             if (typeof nodeId === 'string') {
-                n.nodes[hostname] = { hostname, rpcEndpoint, p2pEndpoint, trusted, nodeId };
+                n.nodes[hostname] = { hostname, rpcEndpoint, p2pEndpoint, trusted, isSeed, nodeId };
             } else {
                 throw new Error(`Unable to obtain the node identifier for ${hostname} (contacted ${rpcEndpoint})`)
             }

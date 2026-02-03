@@ -11,7 +11,7 @@ export class NodeInitConfigCommand {
             program
             .command('init-config')
             .description('Create a new node configuration')
-            .option('--home <home>', 'Path to create the configuration')
+            .option('--home <home>', 'Path to create the configuration', '.')
         )
             .action(async (options) => {
                 await SafeCommandRunner.safeRun(async () => {

@@ -48,6 +48,7 @@ export class NetworksCommand {
             .requiredOption("--rpc <rpc>", "RPC endpoint with protocol (e.g., https://rpc.example.com or http://node.example.com:26657)")
             .requiredOption("--p2p <p2p>", "P2P endpoint without protocol (e.g., p2p.example.com:26656)")
             .option("-t|--trust", "Trust this node (recommended for official nodes)", false)
+            .option("-s|--seed", "Mark this node as a seed node", false)
             .description(`Add a node in the network
 
 Standard Carmentis node configuration:
@@ -60,11 +61,16 @@ Trust option:
   • Currently not enforced but may be used in the future to restrict network joins to official nodes
   • It is recommended to mark official/trusted nodes with --trust
 
+Seed option:
+  • Mark this node as a seed node (will be used for initial peer discovery)
+  • Seed nodes will not be used as reference nodes during configuration
+
 Examples:
   cmts networks add-node testnet --hostname node1 --rpc http://node1.example.com:26657 --p2p node1.example.com:26656
-  cmts networks add-node testnet --hostname ares --rpc https://ares.testnet.carmentis.io --p2p ares.testnet.carmentis.io:26656 --trust`)
+  cmts networks add-node testnet --hostname ares --rpc https://ares.testnet.carmentis.io --p2p ares.testnet.carmentis.io:26656 --trust
+  cmts networks add-node testnet --hostname seed1 --rpc http://seed1.example.com:26657 --p2p seed1.example.com:26656 --seed`)
             .action(async (network, options) => {
-                await SafeCommandRunner.safeRun(() => this.addNode(network, options.hostname, options.rpc, options.p2p, options.trust));
+                await SafeCommandRunner.safeRun(() => this.addNode(network, options.hostname, options.rpc, options.p2p, options.trust, options.seed));
             });
 
 
@@ -215,6 +221,7 @@ Examples:
                 console.log(`🔹 ${nodeName}`);
                 console.log(`    Host     : ${node.hostname}`);
                 console.log(`    Trusted  : ${node.trusted ? '✅ yes' : '❌ no'}`);
+                console.log(`    Seed     : ${node.isSeed ? '✅ yes' : '❌ no'}`);
                 console.log(`    RPC      : ${node.rpcEndpoint}`);
                 console.log(`    P2P      : ${node.p2pEndpoint}`);
                 console.log(`    Node ID  : ${node.nodeId}\n`);
@@ -270,8 +277,8 @@ Examples:
         else console.log(`Network "${network}" does not exist.`);
     }
 
-    private async addNode(network: string, hostname: string, rpcEndpoint: string, p2pEndpoint: string, trusted: boolean): Promise<void> {
-        await this.store.addNode(network, hostname, rpcEndpoint, p2pEndpoint, trusted);
+    private async addNode(network: string, hostname: string, rpcEndpoint: string, p2pEndpoint: string, trusted: boolean, isSeed: boolean = false): Promise<void> {
+        await this.store.addNode(network, hostname, rpcEndpoint, p2pEndpoint, trusted, isSeed);
         console.log(`Added ${hostname} node(s) to network "${network}"`);
     }
 

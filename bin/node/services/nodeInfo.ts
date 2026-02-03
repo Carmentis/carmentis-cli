@@ -6,6 +6,7 @@ export interface NodeInfo {
     rpcEndpoint: string;
     p2pEndpoint: string;
     trusted: boolean;
+    isSeed: boolean;
     online: boolean;
     nodeId?: string;
 }
@@ -36,6 +37,7 @@ export class NodeInfoService {
                     rpcEndpoint,
                     p2pEndpoint: p2PEndpoint,
                     trusted: Boolean(node.trusted),
+                    isSeed: Boolean(node.isSeed),
                     online: false,
                 });
             }
@@ -69,6 +71,7 @@ export class NodeInfoService {
                 rpcEndpoint,
                 p2pEndpoint: p2PEndpoint,
                 trusted: Boolean(node.trusted),
+                isSeed: Boolean(node.isSeed),
                 online: false,
             });
         }

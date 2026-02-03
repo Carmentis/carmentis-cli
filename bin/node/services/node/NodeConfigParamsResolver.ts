@@ -13,6 +13,7 @@ import {join} from "path";
 
 type NetworkJoinParams = {
     joinedNetworkEndpoints: CometBFTEndpointAccumulator;
+    seedNodes: string[];
     enableStateSync: boolean;
     trustHeight: number;
     trustHash: string;
@@ -70,6 +71,7 @@ export class NodeConfigParamsResolver {
                     allowedOrigins: corsAllowedOrigins
                 },
                 endpoints: joiningParams !== undefined ? joiningParams.joinedNetworkEndpoints : emptyInitialEndpointsSet,
+                seeds: joiningParams !== undefined ? joiningParams.seedNodes : undefined,
                 genesis: {
                     networkName: creationParams !== undefined ? creationParams.createdNetworkName : undefined,
                     overrideWith: joiningParams !== undefined ? joiningParams.genesis : undefined,
@@ -96,6 +98,7 @@ export class NodeConfigParamsResolver {
     private async askJoinParams(): Promise<NetworkJoinParams | undefined> {
         // if the user has provided rpc nodes, then use it, otherwise ask for name
         let endpoints : CometBFTEndpointAccumulator;
+        let seedNodes: string[] = [];
         const hasSpecifiedEndpoints = typeof this.options.joinedNetworkEndpoints !== 'undefined';
         if (hasSpecifiedEndpoints) {
             endpoints = new CometBFTEndpointAccumulator();
@@ -111,9 +114,16 @@ export class NodeConfigParamsResolver {
             const nodeService = new NodeInfoService();
             const nodes = await nodeService.listNodesInNetwork(this.store, chosenNetworkName);
             endpoints = new CometBFTEndpointAccumulator();
+
             for (const node of nodes) {
                 if (node.nodeId) {
-                    await endpoints.addRpcEndpoint(node.rpcEndpoint);
+                    // collect seed nodes
+                    if (node.isSeed) {
+                        seedNodes.push(`${node.nodeId}@${node.p2pEndpoint}`);
+                    } else {
+                        // filter out seed nodes from regular RPC endpoints
+                        await endpoints.addRpcEndpoint(node.rpcEndpoint);
+                    }
                     await endpoints.addP2PEndpoint(`${node.nodeId}@${node.p2pEndpoint}`);
                 } else {
                     console.warn(`Node ${node.hostname} seems offline, skipping this node`);
@@ -174,6 +184,7 @@ export class NodeConfigParamsResolver {
 
         return {
             joinedNetworkEndpoints: endpoints,
+            seedNodes: seedNodes,
             enableStateSync,
             trustHash: trustHash !== undefined ? trustHash : "",
             trustHeight: trustHeight !== undefined ? trustHeight : 0,

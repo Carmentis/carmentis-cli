@@ -15,6 +15,7 @@ export interface CometbftConfig {
     home: string;
     moniker: string;
     endpoints: CometBFTEndpointAccumulator,
+    seeds?: string[],
     genesis: { overrideWith?: object, networkName?: string },
     stateSync?: CometBFTStateSync,
     cors: {
@@ -61,6 +62,13 @@ export class CometBFTConfigGenerator {
             this.configTomlEditor.write("persistent_peers", persistentPeers, "p2p");
         } else {
             console.warn("No p2p endpoints found: skipping persistent peers");
+        }
+
+        // update seeds
+        if (this.params.seeds && this.params.seeds.length > 0) {
+            const seedsString = this.params.seeds.join(',');
+            this.configTomlEditor.write("seeds", seedsString, "p2p");
+            console.log(`✅ Configured ${this.params.seeds.length} seed node(s)`);
         }
 
         if (this.params.genesis.overrideWith) {
