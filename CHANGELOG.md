@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/Carmentis/carmentis-cli/compare/v1.9.0...v1.9.1) (2026-02-03)
+
+
+### Bug Fixes
+
+* update container names in NodeInspectCommand for consistency ([63d5e14](https://github.com/Carmentis/carmentis-cli/commit/63d5e1495c05113789d5d40aa4c844213e4675a1))
+
 # [1.9.0](https://github.com/Carmentis/carmentis-cli/compare/v1.8.0...v1.9.0) (2026-02-03)
 
 
