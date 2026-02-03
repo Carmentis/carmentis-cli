@@ -12,7 +12,7 @@ export class NodeInspectCommand {
                     console.log('🔍 Inspecting running containers...\n');
 
                     // check node-abci container
-                    let nodeAbciInfo = NodeInspectCommand.getContainerInfo('carmentis-node-abci');
+                    let nodeAbciInfo = NodeInspectCommand.getContainerInfo('node-abci');
 
                     if (nodeAbciInfo) {
                         console.log('📦 Node ABCI:');
@@ -28,7 +28,7 @@ export class NodeInspectCommand {
                     console.log('');
 
                     // check cometbft container
-                    let cometbftInfo = NodeInspectCommand.getContainerInfo('carmentis-node-cometbft');
+                    let cometbftInfo = NodeInspectCommand.getContainerInfo('node-cometbft');
 
                     if (cometbftInfo) {
                         console.log('📦 CometBFT:');
