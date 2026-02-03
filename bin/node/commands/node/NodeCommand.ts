@@ -1,5 +1,7 @@
 import commander from "commander";
 import {NodeInitConfigCommand} from "./NodeInitConfigCommand";
+import {NodeResetCommand} from "./NodeResetCommand";
+import {NodeCheckUpdateCommand} from "./NodeCheckUpdateCommand";
 
 export class NodeCommand {
     static register(program: commander.Command) {
@@ -10,5 +12,7 @@ export class NodeCommand {
 
         // register additional commands
         NodeInitConfigCommand.register(nodeCommand)
+        NodeResetCommand.register(nodeCommand)
+        NodeCheckUpdateCommand.register(nodeCommand)
     }
 }

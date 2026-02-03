@@ -85,6 +85,9 @@ export class NodeConfigParamsResolver {
                     trustHeight: joiningParams.trustHeight,
                     trustHash: joiningParams.trustHash,
                 } : undefined,
+                mempool: {
+                    createEmptyBlocksInterval: '30s'
+                }
             }
         };
         return params;
