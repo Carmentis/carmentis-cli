@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/Carmentis/carmentis-cli/compare/v1.8.0...v1.9.0) (2026-02-03)
+
+
+### Features
+
+* add inspect command to node module ([c0eaffa](https://github.com/Carmentis/carmentis-cli/commit/c0eaffae0aaac97974eda41d706e97856fe1d96c))
+
 # [1.8.0](https://github.com/Carmentis/carmentis-cli/compare/v1.7.1...v1.8.0) (2026-02-03)
 
 
