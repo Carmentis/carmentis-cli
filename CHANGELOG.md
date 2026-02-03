@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/Carmentis/carmentis-cli/compare/v1.9.1...v1.10.0) (2026-02-03)
+
+
+### Features
+
+* support seed node configuration in networks module ([10da4d4](https://github.com/Carmentis/carmentis-cli/commit/10da4d442c03b3c4f65a65f626875e3687f3870f))
+
 ## [1.9.1](https://github.com/Carmentis/carmentis-cli/compare/v1.9.0...v1.9.1) (2026-02-03)
 
 
