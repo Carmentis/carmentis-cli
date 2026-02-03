@@ -1,3 +1,11 @@
+# [1.8.0](https://github.com/Carmentis/carmentis-cli/compare/v1.7.1...v1.8.0) (2026-02-03)
+
+
+### Features
+
+* default empty block creation interval to 30s ([57a56b5](https://github.com/Carmentis/carmentis-cli/commit/57a56b5180a65cb17420ee4429cae9202646e4d5))
+* node reset and check-update ([8c0e3c5](https://github.com/Carmentis/carmentis-cli/commit/8c0e3c502033926c9f3d44c2ba58f52cded4062e))
+
 ## [1.7.1](https://github.com/Carmentis/carmentis-cli/compare/v1.7.0...v1.7.1) (2026-01-28)
 
 
