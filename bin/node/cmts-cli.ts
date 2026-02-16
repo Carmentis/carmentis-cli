@@ -6,7 +6,6 @@ import {NodeCommand} from "./commands/node/NodeCommand";
 import {DockerCommand} from "./commands/DockerCommand";
 import {OperatorInitCommand} from "./commands/operator/OperatorInitConfigCommand";
 import {OperatorCommand} from "./commands/operator/OperatorCommand";
-import {ValidatorCommand} from "./commands/validator/ValidatorCommand";
 import {CryptoCommand} from "./commands/crypto/CryptoCommand";
 import {UnsafeBetaCommand} from "./commands/unsafe-beta/UnsafeBetaCommand";
 
@@ -17,7 +16,6 @@ const bootstrap = async () => {
 
     // register top-level commands
     NodeCommand.register(program);
-    ValidatorCommand.register(program);
     OperatorCommand.register(program);
     KeygenCommand.register(program);
     new NetworksCommand().register(program);
