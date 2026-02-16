@@ -1,3 +1,15 @@
+# [1.11.0](https://github.com/Carmentis/carmentis-cli/compare/v1.10.1...v1.11.0) (2026-02-16)
+
+
+### Bug Fixes
+
+* adjust snapshot configuration in AbciConfigGenerator ([1c8d4c0](https://github.com/Carmentis/carmentis-cli/commit/1c8d4c0d077f619974e2ee80fb9903693bb60c06))
+
+
+### Features
+
+* add minimum gas configuration for nodes ([231109b](https://github.com/Carmentis/carmentis-cli/commit/231109b6486d9f97d8fa46cad8b42ea8d3e22135))
+
 ## [1.10.1](https://github.com/Carmentis/carmentis-cli/compare/v1.10.0...v1.10.1) (2026-02-03)
 
 
