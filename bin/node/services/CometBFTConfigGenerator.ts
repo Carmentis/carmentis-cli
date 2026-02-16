@@ -1,21 +1,22 @@
-import { CometBFTEndpointAccumulator } from './cometBFTEndpointAccumulator';
+
 import { CometBFTBinary } from './CometBFTBinary';
 import { join } from 'path';
 import { TomlEditor } from '../utils/TomlEditor';
-import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
 import { JsonEditor } from '../utils/JsonEditor';
 import { JsonExporter } from '../utils/JsonExporter';
+import {NodeInfo} from "./nodeInfo";
 
 export interface CometBFTStateSync {
     enabled: boolean;
     trustHeight: number;
     trustHash: string;
+    rpcServers: NodeInfo[];
 }
 export interface CometbftConfig {
     home: string;
     moniker: string;
-    endpoints: CometBFTEndpointAccumulator,
-    seeds?: string[],
+    persistentPeers: NodeInfo[],
+    seeds: NodeInfo[],
     genesis: { overrideWith?: object, networkName?: string },
     stateSync?: CometBFTStateSync,
     cors: {
@@ -24,6 +25,9 @@ export interface CometbftConfig {
     proxyApp: string,
     rpc: {
         laddr: string,
+    },
+    p2p: {
+        externalAddress: string,
     },
     mempool: {
         createEmptyBlocksInterval?: string,
@@ -51,22 +55,27 @@ export class CometBFTConfigGenerator {
         this.configTomlEditor.write("proxy_app", this.params.proxyApp)
         this.configTomlEditor.write("laddr", this.params.rpc.laddr,"rpc")
 
+        // update p2p external address
+        const providedExternalAddress = this.params.p2p.externalAddress.toLowerCase();
+        const externalLaddr = this.formatExternalAddress(providedExternalAddress);
+        this.configTomlEditor.write("external_address", externalLaddr, "p2p");
+
         // update empty block interval
         const createEmptyBlocksInterval = this.params.mempool.createEmptyBlocksInterval ?? '30s';
         this.configTomlEditor.write("create_empty_blocks_interval", createEmptyBlocksInterval, "mempool");
 
         // update persistent peers
-        const p2pEndpoints = this.endpoints.getP2PEndpoints();
-        if (p2pEndpoints.length > 0) {
-            const persistentPeers = this.endpoints.getP2PEndpoints().join(',')
-            this.configTomlEditor.write("persistent_peers", persistentPeers, "p2p");
+        const persistentPeers = this.getPersistentPeers().map(node => this.formatPersistentPeerAddress(node));
+        if (persistentPeers.length > 0) {
+            this.configTomlEditor.write("persistent_peers", persistentPeers.join(","), "p2p");
         } else {
-            console.warn("No p2p endpoints found: skipping persistent peers");
+            console.warn("No persistent peers found: skipping persistent peers configuration");
         }
 
         // update seeds
-        if (this.params.seeds && this.params.seeds.length > 0) {
-            const seedsString = this.params.seeds.join(',');
+        const seeds = this.getSeedP2pTcpEndpoint();
+        if (seeds && seeds.length > 0) {
+            const seedsString = this.params.seeds.map(seed => this.formatSeedP2pTcpEndpoint(seed)).join(",");
             this.configTomlEditor.write("seeds", seedsString, "p2p");
             console.log(`✅ Configured ${this.params.seeds.length} seed node(s)`);
         }
@@ -78,17 +87,14 @@ export class CometBFTConfigGenerator {
             this.genesisEditor.write(['chain_id'], this.params.genesis.networkName);
         }
 
-        // update rpc servers
-        const rpcServers = this.endpoints.getRpcEndpoints();
+        // update cors
         this.writeCors(this.params.cors.allowedOrigins);
 
-        const hasEnoughRPCServers = rpcServers.length >= 2;
-        const isStateSyncEnabled = this.params.stateSync !== undefined && this.params.stateSync.enabled;
-        if (hasEnoughRPCServers && isStateSyncEnabled && this.params.stateSync !== undefined) {
+        // update rpc servers
+        if (this.params.stateSync !== undefined) {
+            const rpcServers = this.getRpcNodes();
             const { trustHeight, trustHash } = this.params.stateSync;
-            this.enableRpcServers(rpcServers, trustHeight, trustHash);
-        } else {
-            console.warn(`No sufficient RPC servers provided (${rpcServers.length} provided) or state sync not enabled: state sync disabled`);
+            this.enableRpcServersForStateSync(rpcServers, trustHeight, trustHash);
         }
     }
 
@@ -96,8 +102,9 @@ export class CometBFTConfigGenerator {
         this.configTomlEditor.write("cors_allowed_origins", allowedOrigins,"rpc");
     }
 
-    private enableRpcServers(rpcServers: string[], trustHeight: number, trustHash: string) {
-        const rpcServersConfig = rpcServers.join(",")
+    private enableRpcServersForStateSync(rpcServers: NodeInfo[], trustHeight: number, trustHash: string) {
+        const rpcEndpoints = rpcServers.map(node => this.formatStateSyncRpcServerFromNode(node));
+        const rpcServersConfig = rpcEndpoints.join(",")
         this.configTomlEditor.write("enable", true, "statesync");
         this.configTomlEditor.write("rpc_servers", rpcServersConfig, 'statesync');
         this.configTomlEditor.write("trust_height", trustHeight, 'statesync');
@@ -112,8 +119,18 @@ export class CometBFTConfigGenerator {
         return this.params.moniker
     }
 
-    private get endpoints() {
-        return this.params.endpoints;
+    private getPersistentPeers() {
+        return this.params.persistentPeers;
+    }
+
+    private getRpcNodes() {
+        if (this.params.stateSync === undefined) return [];
+        const stateSync = this.params.stateSync;
+        return stateSync.rpcServers;
+    }
+
+    private getSeedP2pTcpEndpoint(): string[] {
+        return this.params.seeds.map(seed => this.formatSeedP2pTcpEndpoint(seed));
     }
 
     private get cometbftHome() {
@@ -126,6 +143,48 @@ export class CometBFTConfigGenerator {
 
     private get configFilePath() {
         return join(this.cometbftHome, 'config', 'config.toml');
+    }
+
+
+    /**
+     * The format for a persistent peer address is <node-id>@<hostname>:26656
+     * @param node
+     * @private
+     */
+    private formatPersistentPeerAddress(node: NodeInfo) {
+        return `${node.nodeId}@${node.hostname}:26656`
+    }
+
+    /**
+     * The format for a seed peer address is <node-id>@<hostname>:26656
+     * @param node
+     * @private
+     */
+    private formatSeedP2pTcpEndpoint(node: NodeInfo) {
+        return `${node.nodeId}@${node.hostname}:26656`
+    }
+
+    /**
+     * The format for an external address is tcp://<external-address>:<p2p-port>
+     * @param externalAddress
+     * @private
+     */
+    private formatExternalAddress(externalAddress: string) {
+        const startWithTcp = externalAddress.startsWith('tcp://');
+        const endsWithDefaultP2pPort = externalAddress.endsWith(':26656');
+        if (startWithTcp && endsWithDefaultP2pPort) return externalAddress;
+        if (startWithTcp && !endsWithDefaultP2pPort) return `${externalAddress}:26656`;
+        if (!startWithTcp && endsWithDefaultP2pPort) return `tcp://${externalAddress}`;
+        return `tcp://${externalAddress}:26656`;
+    }
+
+    /**
+     * The format for a state sync RPC server is tcp://<hostname>:<rpc-port>
+     * @param node
+     * @private
+     */
+    private formatStateSyncRpcServerFromNode(node: NodeInfo) {
+        return `tcp://${node.hostname}:26657`
     }
 }
 

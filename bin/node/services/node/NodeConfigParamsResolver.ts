@@ -1,24 +1,24 @@
 import { NodeConfigGenerationParams} from "./NodeConfigGenerator";
 import {confirm} from "@inquirer/prompts";
-import {input, select} from "@inquirer/prompts";
+import {input, select, checkbox} from "@inquirer/prompts";
 import {CryptoEncoderFactory} from "@cmts-dev/carmentis-sdk/client";
 import {EndpointTransformer} from "../../utils/EndpointTransformer";
 import path from "node:path";
-import {CometBFTEndpointAccumulator} from "../cometBFTEndpointAccumulator";
 import {NetworksStore} from "../networksStore";
-import {NodeInfoService} from "../nodeInfo";
+import {NodeInfo, NodeInfoService} from "../nodeInfo";
 import {NodeInfoFetcher} from "../../utils/NodeInfoFetcher";
 import {CometbftConfig} from "../CometBFTConfigGenerator";
 import {join} from "path";
 
 type NetworkJoinParams = {
-    joinedNetworkEndpoints: CometBFTEndpointAccumulator;
-    seedNodes: string[];
+    persistentPeersRpcTcpEndpoint: NodeInfo[];
+    seeds: NodeInfo[];
     enableStateSync: boolean;
     trustHeight: number;
     trustHash: string;
     genesis: object;
-    chosenRpcEndpoint: string
+    chosenPeerToRecoverGenesisSnapshot: NodeInfo,
+    chosenPeersForStateSync: NodeInfo[]
 }
 
 type NetworkCreationParams = {
@@ -36,18 +36,20 @@ export class NodeConfigParamsResolver {
 
     private async generateParams() {
         const moniker = await this.askMoniker();
-        const exposedRpcEndpoint = await this.askExposedRpcEndpoint();
+        const hostDomainName = await this.askNodeDomainName();
+        const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
+        const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
         const isJoining = await this.askIsJoiningExistingNetwork();
         const joiningParams = isJoining ? await this.askJoinParams() : undefined;
         const creationParams = isJoining ? undefined : await this.askCreationParams();
-        const emptyInitialEndpointsSet = new CometBFTEndpointAccumulator();
 
         // deduce the exposed RPC domain name
         const transformer = new EndpointTransformer(exposedRpcEndpoint);
         const exposedRpcDomainName = transformer.extractDomainName();
 
         // cometbft-related config-independent config variables
-        const corsAllowedOrigins = ["*"];
+        const cors = await this.askCors();
+        const corsAllowedOrigins = cors;
         const proxyApp = "tcp://node-abci:26658";
         const rpcListeningAddr = "tcp://0.0.0.0:26657"
 
@@ -63,15 +65,15 @@ export class NodeConfigParamsResolver {
                 exposedRpcEndpoint: exposedRpcEndpoint,
                 exposedRpcDomainName: exposedRpcDomainName,
                 genesis: creationParams ? { sk: creationParams.genesisPrivateKey } : undefined,
-                genesis_snapshot: joiningParams ? { fromRpcEndpoint: joiningParams.chosenRpcEndpoint } : undefined,
+                genesis_snapshot: joiningParams ? { fromRpcEndpoint: joiningParams.chosenPeerToRecoverGenesisSnapshot.rpcEndpoint } : undefined,
                 nodeConfigFilename: 'config.toml'
             },
             cometbftConfig: {
                 cors: {
                     allowedOrigins: corsAllowedOrigins
                 },
-                endpoints: joiningParams !== undefined ? joiningParams.joinedNetworkEndpoints : emptyInitialEndpointsSet,
-                seeds: joiningParams !== undefined ? joiningParams.seedNodes : undefined,
+                persistentPeers: joiningParams !== undefined ? joiningParams.persistentPeersRpcTcpEndpoint : [],
+                seeds: joiningParams !== undefined ? joiningParams.seeds : [],
                 genesis: {
                     networkName: creationParams !== undefined ? creationParams.createdNetworkName : undefined,
                     overrideWith: joiningParams !== undefined ? joiningParams.genesis : undefined,
@@ -82,10 +84,14 @@ export class NodeConfigParamsResolver {
                 rpc: {
                     laddr: rpcListeningAddr
                 },
+                p2p: {
+                    externalAddress: exposedP2pEndpoint
+                },
                 stateSync: joiningParams !== undefined ? {
                     enabled: joiningParams.enableStateSync,
                     trustHeight: joiningParams.trustHeight,
                     trustHash: joiningParams.trustHash,
+                    rpcServers: joiningParams.chosenPeersForStateSync
                 } : undefined,
                 mempool: {
                     createEmptyBlocksInterval: '30s'
@@ -95,87 +101,113 @@ export class NodeConfigParamsResolver {
         return params;
     }
 
-    private async askJoinParams(): Promise<NetworkJoinParams | undefined> {
-        // if the user has provided rpc nodes, then use it, otherwise ask for name
-        let endpoints : CometBFTEndpointAccumulator;
-        let seedNodes: string[] = [];
-        const hasSpecifiedEndpoints = typeof this.options.joinedNetworkEndpoints !== 'undefined';
-        if (hasSpecifiedEndpoints) {
-            endpoints = new CometBFTEndpointAccumulator();
-            for (const endpoint of this.options.joinedNetworkEndpoints) {
-                await endpoints.parseEndpoint(endpoint);
+    private async askNodeDomainName() {
+        return input({
+            message: 'Enter the domain name of your node (my-node.example.com):',
+            required: true,
+            validate: (value: string) => {
+                const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
+                return domainRegex.test(value) ? true : 'Invalid domain name format';
             }
-        } else {
-            // ask the user to select a network to join
-            const networkNames = await this.store.getNetworkNames();
-            const chosenNetworkName = await this.askChoiceAmongKnownNetworks(networkNames);
+        });
+    }
 
-            // load endpoints from the chosen networks
-            const nodeService = new NodeInfoService();
-            const nodes = await nodeService.listNodesInNetwork(this.store, chosenNetworkName);
-            endpoints = new CometBFTEndpointAccumulator();
-
-            for (const node of nodes) {
-                if (node.nodeId) {
-                    // collect seed nodes
-                    if (node.isSeed) {
-                        seedNodes.push(`${node.nodeId}@${node.p2pEndpoint}`);
-                    } else {
-                        // filter out seed nodes from regular RPC endpoints
-                        await endpoints.addRpcEndpoint(node.rpcEndpoint);
-                    }
-                    await endpoints.addP2PEndpoint(`${node.nodeId}@${node.p2pEndpoint}`);
-                } else {
-                    console.warn(`Node ${node.hostname} seems offline, skipping this node`);
-                }
-            }
+    private async askSeedPeersP2pTcpEndpoint(nodes: NodeInfo[]): Promise<NodeInfo[]> {
+        // load the endpoints and raise a message if no seed available
+        const endpoints = nodes.filter(node => node.isSeed);
+        if (endpoints.length === 0) {
+            console.log("No seed nodes found, skipping seed peers selection.");
+            return [];
         }
 
+        const chosenNodes =  await checkbox<NodeInfo>({
+            choices: endpoints.map(node => ({ name: node.hostname, value: node })),
+            message: 'Select seed peers (used to discover new peers in the network, highly recommended):',
+        });
+        return chosenNodes;
+    }
+
+    private async askPersistentPeersRcpTcpEndpoint(nodes: NodeInfo[]): Promise<NodeInfo[]> {
+        const nonSeedPeers = nodes.filter(node => !node.isSeed);
+        const chosenNodes =  await checkbox<NodeInfo>({
+            choices: nonSeedPeers.map(node => ({ name: node.hostname, value: node })),
+            message: 'Select persistent peers (that will remain connected to your node):',
+        });
+        return chosenNodes;
+    }
+
+    private async askJoinParams(): Promise<NetworkJoinParams | undefined> {
+        // ask the user to select a network to join and load endpoints from the chosen networks
+        const networkNames = await this.store.getNetworkNames();
+        const chosenNetworkName = await this.askChoiceAmongKnownNetworks(networkNames);
+        const nodeService = new NodeInfoService();
+        const nodes = await nodeService.listNodesInNetwork(this.store, chosenNetworkName);
+
+
+        // ask the user to select seeds and persistent peers
+        const seedPeers = await this.askSeedPeersP2pTcpEndpoint(nodes);
+        const persistentPeers = await this.askPersistentPeersRcpTcpEndpoint(nodes);
 
         // ask for trust height
-        const chosenRpcEndpoint = await this.askToChooseEndpointToRecoverGenesisSnapshot(
-            endpoints.getRpcEndpoints(),
+        const chosenRpcEndpoint = await this.askToChooseNodeToRecoverGenesisSnapshot(
+            nodes
         );
-        const fetcher = new NodeInfoFetcher(chosenRpcEndpoint);
+        const fetcher = new NodeInfoFetcher(chosenRpcEndpoint.rpcEndpoint);
         const specifiedTrustHeight = await this.askTrustHeight();
 
-        // update rpc servers
-        const rpcServers = endpoints.getRpcEndpoints();
+        // ask for state-sync
+        let possibleRpcServers = nodes.filter(node => !node.isSeed);
+        let chosenRpcServersForStateSync: NodeInfo[] = [];
         let trustHeight, trustHash;
         let enableStateSync = false;
-        if (rpcServers.length >= 2) {
-            // if the provided trust height is 'last', use the first servers
-            const chosenRpcServer = rpcServers[0];
-            const fetcher = new NodeInfoFetcher(chosenRpcServer);
-
-            if (specifiedTrustHeight === 'last') {
-                const response = await fetcher.fetchLastHeightAndHash();
-                if (response !== undefined) {
-                    const {
-                        latest_block_hash,
-                        latest_block_height
-                    } = response;
-                    trustHeight = latest_block_height;
-                    trustHash = latest_block_hash;
-                }
-            } else {
-                const response = await fetcher.fetchHashFromHeight(specifiedTrustHeight);
-                if (response !== undefined) {
-                    const {
-                        block_height,
-                        block_hash
-                    } = response;
-                    trustHash = block_hash;
-                    trustHeight = block_height;
-                }
-            }
-            if (trustHeight !== undefined && trustHash !== undefined) {
-                enableStateSync = true;
-            } else {
-                throw new Error("Undefined trust height")
-            }
+        const canEnableStateSync = possibleRpcServers.length >= 2;
+        if (!canEnableStateSync) {
+            console.warn("Not enough real nodes found to enable state sync, skipping state sync configuration.");
         } else {
-            console.warn(`No sufficient RPC servers provided (${rpcServers.length} provided), cannot enable state sync`);
+            const userWantsStateSync = await confirm({
+                message: "Do you want to enable state sync?",
+                default: true,
+            });
+            if (!userWantsStateSync) {
+                console.log("State sync disabled.");
+            } else {
+                // ask the user to select the RPC servers to use for state sync
+                chosenRpcServersForStateSync = await this.askRpcServersForStateSync(possibleRpcServers);
+                if (chosenRpcServersForStateSync.length === 0) {
+                    console.warn("No RPC servers selected for state sync: state sync disabled.");
+                } else {
+                    // if the provided trust height is 'last', use the first servers
+                    const chosenRpcServer = chosenRpcServersForStateSync[0];
+                    const fetcher = new NodeInfoFetcher(chosenRpcServer.rpcEndpoint);
+
+                    if (specifiedTrustHeight === 'last') {
+                        const response = await fetcher.fetchLastHeightAndHash();
+                        if (response !== undefined) {
+                            const {
+                                latest_block_hash,
+                                latest_block_height
+                            } = response;
+                            trustHeight = latest_block_height;
+                            trustHash = latest_block_hash;
+                        }
+                    } else {
+                        const response = await fetcher.fetchHashFromHeight(specifiedTrustHeight);
+                        if (response !== undefined) {
+                            const {
+                                block_height,
+                                block_hash
+                            } = response;
+                            trustHash = block_hash;
+                            trustHeight = block_height;
+                        }
+                    }
+                    if (trustHeight !== undefined && trustHash !== undefined) {
+                        enableStateSync = true;
+                    } else {
+                        throw new Error("Undefined trust height")
+                    }
+                }
+            }
         }
 
         // load the genesis from it
@@ -183,15 +215,26 @@ export class NodeConfigParamsResolver {
         if (genesis === undefined) throw new Error('Genesis not provided by the RPC node.')
 
         return {
-            joinedNetworkEndpoints: endpoints,
-            seedNodes: seedNodes,
+            persistentPeersRpcTcpEndpoint: persistentPeers,
+            seeds: seedPeers,
             enableStateSync,
             trustHash: trustHash !== undefined ? trustHash : "",
             trustHeight: trustHeight !== undefined ? trustHeight : 0,
             genesis: genesis,
-            chosenRpcEndpoint: chosenRpcEndpoint
+            chosenPeerToRecoverGenesisSnapshot: chosenRpcEndpoint,
+            chosenPeersForStateSync: chosenRpcServersForStateSync
         }
     }
+
+    private async askRpcServersForStateSync(nodes: NodeInfo[]) {
+        const rpcServers = nodes.filter(node => !node.isSeed);//.map(node => node.rpcEndpoint);
+        const chosenRpcServers = await checkbox<NodeInfo>({
+            choices: rpcServers.map(node => ({ name: node.rpcEndpoint, value: node })),
+            message: 'Select RPC servers to use for state sync:',
+        });
+        return chosenRpcServers;
+    }
+
 
     private async askCreationParams(): Promise<NetworkCreationParams | undefined> {
         const networkName = await this.askNetworkNameToCreate();
@@ -230,16 +273,68 @@ export class NodeConfigParamsResolver {
         );
     }
 
-    private askExposedRpcEndpoint() {
+    private async askCors() {
+        let cors = ["*"]
+        let agreed = false;
+        let shouldAskIfOk = true;
+        do {
+            if (shouldAskIfOk) {
+                agreed = await confirm({
+                    message: `Are you satisfied with the following cors configuration: ${JSON.stringify(cors) || '(none)'}?`,
+                });
+            }
+
+
+            if (!agreed) {
+                const formattedCors = await input({
+                    message: "Enter entries for your CORS configuration (separated by commas):",
+                    validate: (value: string) => typeof value === 'string' && value.length > 0 && value.trim().length > 0,
+                });
+                try {
+                    const corsEntries = formattedCors.split(',').map(entry => entry.trim());
+                    cors = corsEntries.filter(entry => entry.length > 0);
+                    shouldAskIfOk =  true;
+                } catch (e) {
+                    console.error("Invalid CORS configuration format. Please enter valid domain entries separated by commas.");
+                    shouldAskIfOk = false;
+                }
+            }
+        } while (!agreed);
+
+        return cors;
+    }
+
+    private askExposedRpcEndpoint(nodeDomainName: string) {
         return (
             this.options.exposedRpcEndpoint ||
             input({
-                message: 'Enter the endpoint where one can contact the RPC interface of your node',
+                message: 'Enter the endpoint where one can contact the RPC interface of your node (https://example.com or http://example.com:26657):',
                 required: true,
+                default: `https://${nodeDomainName}`,
                 validate: (value: string) => {
                     const transformer = new EndpointTransformer(value);
                     return transformer.isHttpOrHttpsEndpoint();
                 },
+            })
+        );
+    }
+
+    private askExternalP2PAddr(nodeDomainName: string) {
+        return (
+            input({
+                message: 'Enter the TCP endpoint where one can contact the P2P interface of your node (example: tcp://example.com:26656)',
+                required: true,
+                default: `tcp://${nodeDomainName}:26656`
+            })
+        );
+    }
+
+    private askExposedP2pEndpoint() {
+        return (
+            this.options.exposedP2pEndpoint ||
+            input({
+                message: 'Enter the endpoint where one can contact the P2P interface of your node',
+                required: true,
             })
         );
     }
@@ -280,10 +375,11 @@ export class NodeConfigParamsResolver {
         });
     }
 
-    private async askToChooseEndpointToRecoverGenesisSnapshot(endpoints: string[]) {
-        return select<string>({
-            choices: endpoints,
-            message: 'Select one the RPC endpoint to recover the genesis snapshot',
+    private async askToChooseNodeToRecoverGenesisSnapshot(nodes: NodeInfo[]) {
+        const endpoints = nodes.filter(node => !node.isSeed);//.map(node => node.rpcEndpoint);
+        return select<NodeInfo>({
+            choices: endpoints.map(node => ({ name: node.rpcEndpoint, value: node })),
+            message: 'Select one RPC endpoint to recover the genesis snapshot (used only during block-sync, not during state-sync):',
             default: endpoints[0],
         });
     }

@@ -45,14 +45,11 @@ export class NodeInitConfigCommand {
             .option('--join-network <network>', 'Creates a configuration to join a known network.')
             .option(
                 '--join-from-endpoints <endpoints...>',
-                'Creates a configuration to a network from node endpoints.\n' +
-                'Each entry can be of the form:\n' +
-                '- https://node.com for automatic RPC/P2P endpoint recovery\n' +
-                '- rpc:https://node.com to specify RPC endpoint\n' +
-                '- p2p:nodeid@node.com to specify P2P endpoint\n',
+                'Creates a configuration to a network from node endpoints.'
             )
             .option('--moniker <moniker>', 'Name of the node')
             .option('-e|--exposed-rpc-endpoint <exposed-rpc-endpoint>', 'The endpoint from which one can contact the RPC interface of your node.')
+            .option('--p2p-tcp-endpoint <p2p-tcp-endpoint>', 'The TCP endpoint from which one can contact the P2P interface of your node (example: tcp://my-node.example.com:26656).')
             .option('--trust-height <height>', 'Height from which the blockchain is trusted')
             .option('--private-key <sk>', 'Private key used to generate the genesis state.');
     }

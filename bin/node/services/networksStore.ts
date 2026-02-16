@@ -1,8 +1,6 @@
 import os from 'node:os';
 import path from 'node:path';
 import * as fs from 'node:fs/promises';
-import { CometBFTEndpointAccumulator } from './cometBFTEndpointAccumulator';
-import { EndpointTransformer } from '../utils/EndpointTransformer';
 import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
 
 export interface NetworksFile {
