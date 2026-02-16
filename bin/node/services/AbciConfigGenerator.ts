@@ -38,9 +38,9 @@ export class AbciConfigGenerator {
                 storage: '/abci',
             },
             snapshots:  {
-                snapshot_block_period: 1,
+                snapshot_block_period: 50,
                 block_history_before_snapshot: 0,
-                max_snapshots: 3,
+                max_snapshots: 10,
             }
         };
 
