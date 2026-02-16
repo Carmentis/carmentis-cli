@@ -1,6 +1,8 @@
 import * as TOML from '@iarna/toml';
 import { TomlExporter } from '../utils/TomlExporter';
 import { join } from 'path';
+import {input} from '@inquirer/prompts';
+import {CMTSToken} from "@cmts-dev/carmentis-sdk/server";
 
 export interface AbciConfigParams {
     home: string,
@@ -13,6 +15,7 @@ export interface AbciConfigParams {
         fromRpcEndpoint: string,
     },
     nodeConfigFilename: string;
+    min_microblock_gas_in_atomic_accepted: number;
 }
 export class AbciConfigGenerator {
 
@@ -31,7 +34,8 @@ export class AbciConfigGenerator {
                     query: {
                         port: 26_659
                     }
-                }
+                },
+                min_microblock_gas_in_atomic_accepted: this.params.min_microblock_gas_in_atomic_accepted,
             },
             paths: {
                 cometbft_home: '/cometbft',
@@ -41,7 +45,7 @@ export class AbciConfigGenerator {
                 snapshot_block_period: 50,
                 block_history_before_snapshot: 0,
                 max_snapshots: 10,
-            }
+            },
         };
 
         if (this.params.genesis_snapshot) {

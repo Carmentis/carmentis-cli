@@ -9,6 +9,7 @@ import {NodeInfo, NodeInfoService} from "../nodeInfo";
 import {NodeInfoFetcher} from "../../utils/NodeInfoFetcher";
 import {CometbftConfig} from "../CometBFTConfigGenerator";
 import {join} from "path";
+import {CMTSToken} from "@cmts-dev/carmentis-sdk/server";
 
 type NetworkJoinParams = {
     persistentPeersRpcTcpEndpoint: NodeInfo[];
@@ -37,6 +38,9 @@ export class NodeConfigParamsResolver {
     private async generateParams() {
         const moniker = await this.askMoniker();
         const hostDomainName = await this.askNodeDomainName();
+        // ask for minimum gas
+        const minMicroblockGasInAtomicAccepted = await this.askMinimumGasAccepted();
+
         const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
         const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
         const isJoining = await this.askIsJoiningExistingNetwork();
@@ -54,6 +58,7 @@ export class NodeConfigParamsResolver {
         const rpcListeningAddr = "tcp://0.0.0.0:26657"
 
 
+
         const params: NodeConfigGenerationParams = {
             home: this.ensureHome(),
             shouldDownload: {
@@ -66,7 +71,8 @@ export class NodeConfigParamsResolver {
                 exposedRpcDomainName: exposedRpcDomainName,
                 genesis: creationParams ? { sk: creationParams.genesisPrivateKey } : undefined,
                 genesis_snapshot: joiningParams ? { fromRpcEndpoint: joiningParams.chosenPeerToRecoverGenesisSnapshot.rpcEndpoint } : undefined,
-                nodeConfigFilename: 'config.toml'
+                nodeConfigFilename: 'config.toml',
+                min_microblock_gas_in_atomic_accepted: minMicroblockGasInAtomicAccepted,
             },
             cometbftConfig: {
                 cors: {
@@ -99,6 +105,18 @@ export class NodeConfigParamsResolver {
             }
         };
         return params;
+    }
+
+    private async askMinimumGasAccepted() {
+        const minGas = await input({
+            message: 'Enter the minimum gas accepted by the node (e.g., 0.1 CMTS, 100 aCMTS)',
+            default: "0 CMTS",
+            validate: (value: string) => {
+                CMTSToken.parse(value);
+                return true;
+            }
+        })
+        return CMTSToken.parse(minGas).getAmountAsAtomic();
     }
 
     private async askNodeDomainName() {
