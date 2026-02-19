@@ -8,28 +8,14 @@ import {DotEnvExporter} from "../../utils/DotEnvExporter";
 export interface OperatorConfigGenerationParams {
     generateAt: string,
     operatorHome: string,
-    nodeUrl: string,
     downloadEndpoints:  {
         dockerCompose: string,
         caddyfile: string,
     }
     domainNames: {
-        workspace: string,
         operator: string,
     }
     allowEncryptionKeyGeneration: boolean,
-    database: {
-        type: 'postgresql',
-        user: string,
-        port: number,
-        database: string,
-        url: string,
-        password: string,
-        useDockerSecret: boolean,
-    },
-    filenames: {
-        operatorConfigFilename: string,
-    },
     shouldDownload: {
         dockerCompose: boolean,
         caddyfile: boolean,
@@ -45,8 +31,7 @@ export class OperatorConfigGenerator {
         const generationPath = path.resolve(this.params.generateAt);
         const dockerComposePath = join(generationPath, `docker-compose.yml`);
         const caddyFilePath = join(generationPath, `Caddyfile`);
-        const dotEnvPath = join(generationPath, `.env`);
-        const operatorConfigPath = join(generationPath, this.params.filenames.operatorConfigFilename);
+        //const dotEnvPath = join(generationPath, `.env`);
 
 
         // we create the folder if not already exists and download the required files
@@ -56,13 +41,16 @@ export class OperatorConfigGenerator {
         }
 
         // we conditionally generate and update the caddyfile
-        const { workspace: workspaceDomainName, operator: operatorDomainName } = this.params.domainNames;
+        const { operator: operatorDomainName } = this.params.domainNames;
         if (this.params.shouldDownload.caddyfile) {
             await FileDownloader.downloadAt( this.caddyFileEndpoint, caddyFilePath );
             await FileManager.replaceInFile(caddyFilePath, 'operator.your-domain-name', operatorDomainName);
-            await FileManager.replaceInFile(caddyFilePath, 'workspace.your-domain-name', workspaceDomainName);
+
+            // we currently don't need to use a workspace anymore!
+            //await FileManager.replaceInFile(caddyFilePath, 'workspace.your-domain-name', workspaceDomainName);
         }
 
+        /* We currently do not need to generate a configuration anymore!
         // we generate the config.toml file
         await TomlExporter.exportToFile({
             operator: {
@@ -85,13 +73,18 @@ export class OperatorConfigGenerator {
             },
         }, operatorConfigPath)
 
+         */
+
+        /* We currently do not need to export a .env file
         // we generate the .env file
         await DotEnvExporter.exportToFile({
-            OPERATOR_URL: operatorDomainName,
-            POSTGRES_USER: this.params.database.user,
-            POSTGRES_DB: this.params.database.database,
-            POSTGRES_PASSWORD: this.params.database.password
+            //OPERATOR_URL: operatorDomainName,
+            //aPOSTGRES_USER: this.params.database.user,
+            //POSTGRES_DB: this.params.database.database,
+            //POSTGRES_PASSWORD: this.params.database.password
         }, dotEnvPath)
+
+         */
 
 
 

@@ -11,7 +11,6 @@ export class OperatorConfigParamsResolver {
      */
     static async resolveParams(options: any) {
         const config: OperatorConfigGenerationParams = {
-            nodeUrl: await this.askNodeUrl(options.nodeUrl),
             allowEncryptionKeyGeneration: true,
             downloadEndpoints:  {
                 dockerCompose: 'https://raw.githubusercontent.com/Carmentis/architectures/refs/heads/main/operator/docker-compose-with-caddy.yml',
@@ -19,22 +18,9 @@ export class OperatorConfigParamsResolver {
             },
             domainNames: {
                 operator: await this.askOperatorDomainName(options.operatorDomainName),
-                workspace: await this.askWorkspaceDomainName(options.workspaceDomainName)
-            },
-            database: {
-                database: "operator",
-                password: this.generateDatabasePassword(),
-                useDockerSecret: false,
-                port: 5432,
-                type: "postgresql",
-                url: "operator-db",
-                user: "postgres"
             },
             generateAt: options.home,
             operatorHome: '/operator', // Docker-specific,
-            filenames: {
-                operatorConfigFilename: 'config.toml'
-            },
             shouldDownload: {
                 dockerCompose: true,
                 caddyfile: true
