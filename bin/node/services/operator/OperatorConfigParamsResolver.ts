@@ -29,23 +29,6 @@ export class OperatorConfigParamsResolver {
         return config;
     }
 
-    private static askNodeUrl(providedNodeUrl?: string) {
-        return providedNodeUrl || input({
-            message: 'Enter the node RPC endpoint used by the operator to interact with the chain',
-            validate: (value: string) => new EndpointTransformer(value).isHttpOrHttpsEndpoint(),
-        })
-    }
-
-    private static  generateDatabasePassword() {
-        return randomBytes(32).toString("hex");
-    }
-
-    private static async askWorkspaceDomainName(providedDomainName?: string) {
-        return providedDomainName || input({
-            message: 'Enter the domain name of the workspace',
-        })
-    }
-
     private static async askOperatorDomainName(providedDomainName?: string) {
         return providedDomainName || input({
             message: 'Enter the domain name of the operator',

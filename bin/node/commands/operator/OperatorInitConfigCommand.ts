@@ -27,9 +27,7 @@ export class OperatorInitCommand {
 
     static registerOptions(program: commander.Command) {
         program
-            .option('--workspace-domain-name <workspace-domain-name>', "Domain name of the workspace")
             .option('--operator-domain-name <operator-domain-name>', "Domain name of the operator")
-            .option('--node-url <node-url>', "Url of the node used by the operator to interact with the chain")
     }
 
 
