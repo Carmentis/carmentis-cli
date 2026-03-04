@@ -25,7 +25,7 @@ export class CometBFTBinary {
                 'run',
                 '--rm',
                 '-v', `${resolvedPath}:/cometbft`,
-                '-u', "1000",
+                '-u', process.env.UID || "1000",
                 'cometbft/cometbft:v0.38.x',
                 'init'
             ];

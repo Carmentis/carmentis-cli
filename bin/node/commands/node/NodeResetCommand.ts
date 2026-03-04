@@ -58,7 +58,8 @@ export class NodeResetCommand {
                     // execute cometbft unsafe-reset-all if cometbft folder exists
                     if (cometbftExists) {
                         const cometbftHome = cometbftPath;
-                        const dockerCommand = `docker run --rm -u 1000 -v ${cometbftHome}:/cometbft cometbft/cometbft:v0.38.x unsafe-reset-all --home /cometbft`;
+                        const uid = process.env.UID || '1000';
+                        const dockerCommand = `docker run --rm -u ${uid} -v ${cometbftHome}:/cometbft cometbft/cometbft:v0.38.x unsafe-reset-all --home /cometbft`;
 
                         console.log('Executing cometbft unsafe-reset-all...');
                         const success = Binary.execute(dockerCommand, false);
