@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/Carmentis/carmentis-cli/compare/v1.12.0...v1.12.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* use dynamic UID in docker commands for NodeResetCommand and CometBFTBinary ([67e65d5](https://github.com/Carmentis/carmentis-cli/commit/67e65d58102a36155368592cfff61bb511dbd562))
+
 # [1.12.0](https://github.com/Carmentis/carmentis-cli/compare/v1.11.1...v1.12.0) (2026-03-04)
 
 
