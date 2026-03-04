@@ -40,6 +40,7 @@ export class NodeConfigParamsResolver {
         const hostDomainName = await this.askNodeDomainName();
         // ask for minimum gas
         const minMicroblockGasInAtomicAccepted = await this.askMinimumGasAccepted();
+        const network = await this.askNetwork();
 
         const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
         const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
@@ -65,6 +66,7 @@ export class NodeConfigParamsResolver {
                 caddyFile: true,
                 dockerCompose: true,
             },
+            network: network,
             abciConfig: {
                 home: this.getAbciHome(),
                 exposedRpcEndpoint: exposedRpcEndpoint,
@@ -422,6 +424,17 @@ export class NodeConfigParamsResolver {
 
     private getCometbftHome() {
         return join(this.options.home, 'cometbft');
+    }
+
+    private async askNetwork() {
+        return select<string>({
+            message: 'Select the network:',
+            choices: [
+                { name: 'devnet', value: 'devnet' },
+                { name: 'testnet', value: 'testnet' }
+            ],
+            default: 'testnet'
+        });
     }
 
 }

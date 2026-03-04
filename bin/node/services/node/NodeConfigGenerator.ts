@@ -12,6 +12,7 @@ export type NodeConfigGenerationParams = {
         caddyFile: boolean,
         dockerCompose: boolean,
     };
+    network: string;
     cometbftConfig: CometbftConfig,
     abciConfig: AbciConfigParams,
 };
@@ -31,6 +32,7 @@ export class NodeConfigGenerator {
         if (this.params.shouldDownload.dockerCompose) {
             const dockerComposePath = join(this.params.home, 'docker-compose.yml');
             await FileDownloader.downloadAt("https://raw.githubusercontent.com/Carmentis/architectures/refs/heads/main/node/docker-compose-with-caddy.yml", dockerComposePath);
+            await FileManager.replaceInFile(dockerComposePath, "ghcr.io/carmentis/node/abci:TAG", `ghcr.io/carmentis/node/abci:${this.params.network}`);
         }
 
         // download the Caddyfile
