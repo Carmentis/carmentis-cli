@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/Carmentis/carmentis-cli/compare/v1.11.1...v1.12.0) (2026-03-04)
+
+
+### Features
+
+* add network configuration to NodeConfigParamsResolver and NodeConfigGenerator ([6ffa132](https://github.com/Carmentis/carmentis-cli/commit/6ffa132c909a857fe0d8d97edb7330bab92ff461))
+
 ## [1.11.1](https://github.com/Carmentis/carmentis-cli/compare/v1.11.0...v1.11.1) (2026-03-04)
 
 
