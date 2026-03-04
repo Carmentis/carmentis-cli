@@ -91,7 +91,7 @@ export class CometBFTConfigGenerator {
         this.writeCors(this.params.cors.allowedOrigins);
 
         // update rpc servers
-        if (this.params.stateSync !== undefined) {
+        if (this.params.stateSync !== undefined && this.params.stateSync.enabled) {
             const rpcServers = this.getRpcNodes();
             const { trustHeight, trustHash } = this.params.stateSync;
             this.enableRpcServersForStateSync(rpcServers, trustHeight, trustHash);
