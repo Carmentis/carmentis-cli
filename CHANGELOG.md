@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/Carmentis/carmentis-cli/compare/v1.11.0...v1.11.1) (2026-03-04)
+
+
+### Bug Fixes
+
+* check stateSync.enabled before enabling RPC servers ([71db993](https://github.com/Carmentis/carmentis-cli/commit/71db993cac04a7eb8283ec847960d12685c940b3))
+
 # [1.11.0](https://github.com/Carmentis/carmentis-cli/compare/v1.10.1...v1.11.0) (2026-02-16)
 
 
