@@ -17,7 +17,7 @@ export class GenAbciConfigCommand {
                         exposedRpcEndpoint: 'http://localhost:26657',
                         exposedRpcDomainName: 'localhost',
                         nodeConfigFilename: 'config.toml',
-                        min_microblock_gas_in_atomic_accepted: 0,
+                        min_microblock_gas_price_in_atomics: 1,
                     });
                     
                     await abciConfigGenerator.generateConfig();

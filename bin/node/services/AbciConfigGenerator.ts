@@ -15,7 +15,7 @@ export interface AbciConfigParams {
         fromRpcEndpoint: string,
     },
     nodeConfigFilename: string;
-    min_microblock_gas_in_atomic_accepted: number;
+    min_microblock_gas_price_in_atomics: number;
 }
 export class AbciConfigGenerator {
 
@@ -35,7 +35,7 @@ export class AbciConfigGenerator {
                         port: 26_659
                     }
                 },
-                min_microblock_gas_in_atomic_accepted: this.params.min_microblock_gas_in_atomic_accepted,
+                min_microblock_gas_price_in_atomics: this.params.min_microblock_gas_price_in_atomics,
             },
             paths: {
                 cometbft_home: '/cometbft',

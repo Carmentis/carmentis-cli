@@ -39,7 +39,7 @@ export class NodeConfigParamsResolver {
         const moniker = await this.askMoniker();
         const hostDomainName = await this.askNodeDomainName();
         // ask for minimum gas
-        const minMicroblockGasInAtomicAccepted = await this.askMinimumGasAccepted();
+        const minMicroblockGasInAtomicAccepted = await this.askMinimumGasPriceAccepted();
         const network = await this.askNetwork();
 
         const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
@@ -74,7 +74,7 @@ export class NodeConfigParamsResolver {
                 genesis: creationParams ? { sk: creationParams.genesisPrivateKey } : undefined,
                 genesis_snapshot: joiningParams ? { fromRpcEndpoint: joiningParams.chosenPeerToRecoverGenesisSnapshot.rpcEndpoint } : undefined,
                 nodeConfigFilename: 'config.toml',
-                min_microblock_gas_in_atomic_accepted: minMicroblockGasInAtomicAccepted,
+                min_microblock_gas_price_in_atomics: minMicroblockGasInAtomicAccepted,
             },
             cometbftConfig: {
                 cors: {
@@ -109,10 +109,10 @@ export class NodeConfigParamsResolver {
         return params;
     }
 
-    private async askMinimumGasAccepted() {
+    private async askMinimumGasPriceAccepted() {
         const minGas = await input({
-            message: 'Enter the minimum gas accepted by the node (e.g., 0.1 CMTS, 100 aCMTS)',
-            default: "0 CMTS",
+            message: 'You have the possibility to reject microblocks having lower than a specified gas price.\nBy default, this value is 1 aCMTS (all microblocks are considered). Enter your minimum gas price accepted by the node (e.g., 0.1 CMTS, 100 aCMTS):',
+            default: "1 aCMTS",
             validate: (value: string) => {
                 CMTSToken.parse(value);
                 return true;
