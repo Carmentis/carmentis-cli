@@ -8,8 +8,28 @@ import {OperatorInitCommand} from "./commands/operator/OperatorInitConfigCommand
 import {OperatorCommand} from "./commands/operator/OperatorCommand";
 import {CryptoCommand} from "./commands/crypto/CryptoCommand";
 import {UnsafeBetaCommand} from "./commands/unsafe-beta/UnsafeBetaCommand";
+import updateNotifier from 'update-notifier';
+import packageJson from '../../package.json';
+
+
+// Checks for available update and returns an instance
+const notifier = updateNotifier({
+    pkg: packageJson,
+    updateCheckInterval: 0,
+});
+
+// Notify using the built-in convenience method
+
+
+
 
 const bootstrap = async () => {
+    // `notifier.update` contains some useful info about the update
+    await notifier.fetchInfo();
+    notifier.notify({
+        isGlobal: true
+    });
+
     // create the description of the binary
     const program = new Command("cmts");
     program.name('Carmentis CLI').description('CLI for Carmentis');
