@@ -1,3 +1,20 @@
+# [1.13.0](https://github.com/Carmentis/carmentis-cli/compare/v1.12.1...v1.13.0) (2026-06-15)
+
+
+### Bug Fixes
+
+* correct typings and simplify node recovery logic ([36fb579](https://github.com/Carmentis/carmentis-cli/commit/36fb5790554786381be9fb7dbabd42463e4bd67b))
+* typing and user uid/gid setting ([03d8b5a](https://github.com/Carmentis/carmentis-cli/commit/03d8b5a88409943d065d727470d865546d007a27))
+* update NodeConfigGenerator to use correct cometbft config path ([842b6bf](https://github.com/Carmentis/carmentis-cli/commit/842b6bfd4eab675d0d1fcbfb9654cd4e3af79068))
+
+
+### Features
+
+* add CLI update notification check ([0b134d2](https://github.com/Carmentis/carmentis-cli/commit/0b134d2182bd471a8d03fd8b74a65a6228c4d223))
+* enable JSON module resolution and add update-notifier dependency ([62ed84d](https://github.com/Carmentis/carmentis-cli/commit/62ed84d81478cae136afadac0896b1b8520fb879))
+* enhance GenesisNodeConfigParamsResolver with network validation and ABCI label selection ([58dc51e](https://github.com/Carmentis/carmentis-cli/commit/58dc51e5bd88514fb8d66964ab6807068d0bba24))
+* introduce ABCI configuration and enhanced network management ([7e3c2fd](https://github.com/Carmentis/carmentis-cli/commit/7e3c2fdf92d6b453d7c045f0a27a09539a040e58))
+
 ## [1.12.1](https://github.com/Carmentis/carmentis-cli/compare/v1.12.0...v1.12.1) (2026-03-04)
 
 
