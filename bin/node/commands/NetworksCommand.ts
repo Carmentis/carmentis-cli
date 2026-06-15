@@ -240,8 +240,7 @@ Examples:
             const nodes = network.nodes;
             for (const hostname of Object.keys(nodes)) {
                 const node = nodes[hostname];
-                const rpcEndpoint = node.rpcEndpoint;
-                const fetcher = new NodeInfoFetcher(rpcEndpoint);
+                const fetcher = NodeInfoFetcher.createFromNode(node);
                 const onlineNodeId = await fetcher.extractNodeId();
                 const storedNodeId = node.nodeId;
                 if (typeof onlineNodeId === 'string') {

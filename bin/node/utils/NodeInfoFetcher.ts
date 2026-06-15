@@ -1,6 +1,15 @@
+import {NetworkNode} from "../types/NetworksFile";
+
 export class NodeInfoFetcher {
     private static FETCH_TIMEOUT = 60 * 60 * 1000;
-    constructor(private readonly rpcEndpoint: string) {}
+
+
+    static createFromNode(node: NetworkNode): NodeInfoFetcher {
+        return new NodeInfoFetcher(node.rpcEndpoint);
+    }
+
+    constructor(private readonly rpcEndpoint: string) {
+    }
 
     async extractNodeId(): Promise<string | undefined> {
         const status = await this.fetchStatus();
@@ -17,7 +26,7 @@ export class NodeInfoFetcher {
         return this.fetch<any>(url);
     }
 
-    async fetchGenesis() {
+    async fetchGenesisObject() {
         const url = this.rpcEndpoint.replace(/\/$/, '') + '/genesis';
         const result = await this.fetch<{ result: { genesis: object } }>(url);
         return result?.result?.genesis;

@@ -2,7 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
-import {NetworksFile} from "../types/NetworksFile";
+import {Network, NetworksFile} from "../types/NetworksFile";
 import deepmerge from "deepmerge";
 import {getDefaultNetworks} from "../networks";
 
@@ -139,5 +139,10 @@ export class NetworksStore {
     async getNetworkNames() {
         const store =  await this.read();
         return Object.keys(store)
+    }
+
+    async getNetworkByName(networkName: string): Promise<Network> {
+        const networks = await this.read();
+        return networks[networkName];
     }
 }

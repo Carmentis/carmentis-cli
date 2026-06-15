@@ -3,16 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import {FileManager} from "../utils/FileManager";
+import * as os from 'os';
+
 
 export class CometBFTBinary {
-    static isGoInstalled() : boolean {
-        return Binary.isBinaryAvailable("go");
-    }
-
-    static isCometBFTInstalled(): boolean {
-        return Binary.isBinaryAvailable("cometbft");
-    }
-
     static executeInit(home: string, executeInDocker: boolean = true) {
         if (executeInDocker) {
             // we ensure the provided home is a folder (or create it if not exists)
@@ -25,7 +19,7 @@ export class CometBFTBinary {
                 'run',
                 '--rm',
                 '-v', `${resolvedPath}:/cometbft`,
-                '-u', process.env.UID || "1000",
+                '-u', `${os.userInfo().uid.toString()}:${os.userInfo().gid.toString()}`,
                 'cometbft/cometbft:v0.38.x',
                 'init'
             ];

@@ -46,8 +46,8 @@ export class AbciConfigGenerator {
             }) : undefined,
 
             // only for joining nodes
-            genesis_snapshot: this.params.genesis_snapshot ? ({
-                rpc_endpoint: this.params.genesis_snapshot.fromRpcEndpoint
+            genesis_snapshot: this.params.genesis_snapshot_origin ? ({
+                rpc_endpoint: this.params.genesis_snapshot_origin.rpcEndpoint
             }) : undefined
         });
         const configFilePath = join(this.home, this.params.abciConfigFilename);

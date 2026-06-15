@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import {NetworkNodeSchema} from "./NetworksFile";
 // Parameters used to generate the Abci config
 export const AbciConfigGenParamsSchema = v.object({
     home: v.string(),
@@ -7,9 +8,7 @@ export const AbciConfigGenParamsSchema = v.object({
     genesis: v.optional(v.object({
         sk: v.string(),
     })),
-    genesis_snapshot: v.optional(v.object({
-        fromRpcEndpoint: v.string(),
-    })),
+    genesis_snapshot_origin: v.optional(NetworkNodeSchema),
     abciConfigFilename: v.string(),
     min_microblock_gas_price_in_atomics: v.number(),
 })

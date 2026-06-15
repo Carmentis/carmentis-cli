@@ -5,48 +5,71 @@ import {CryptoEncoderFactory} from "@cmts-dev/carmentis-sdk/client";
 import {EndpointTransformer} from "../../utils/EndpointTransformer";
 import path from "node:path";
 import {NetworksStore} from "../networksStore";
-import {NodeInfo, NodeInfoService} from "../nodeInfo";
-import {NodeInfoFetcher} from "../../utils/NodeInfoFetcher";
-import {CometbftConfig} from "../CometBFTConfigGenerator";
+import * as v from 'valibot';
 import {join} from "path";
 import {CMTSToken} from "@cmts-dev/carmentis-sdk/server";
+import {Network, NetworkNode} from "../../types/NetworksFile";
+import {AbstractNodeConfigParamsResolver} from "./AbstractNodeConfigParamsResolver";
+import {
+    CometBFTConfig, CometBFTConfigPartial,
+    CometBFTConfigSchema, CometBFTConsensus,
+    CometBFTConsensusSchema,
+    CometBFTP2P, CometBFTP2PPartial, CometBFTP2PSchema, CometBFTRPCPartial, CometBFTRpcSchema,
+    CometBFTStateSync, CometBFTStateSyncPartial, CometBFTStateSyncSchema
+} from "../../types/CometbftConfig";
+import {NodeInfoService} from "../nodeInfo";
+import {NodeInfoFetcher} from "../../utils/NodeInfoFetcher";
 
 type NetworkJoinParams = {
-    persistentPeersRpcTcpEndpoint: NodeInfo[];
-    seeds: NodeInfo[];
+    //persistentPeersRpcTcpEndpoint: NetworkNode[];
+    //seeds: NetworkNode[];
     enableStateSync: boolean;
     trustHeight: number;
     trustHash: string;
-    genesis: object;
-    chosenPeerToRecoverGenesisSnapshot: NodeInfo,
-    chosenPeersForStateSync: NodeInfo[]
+    genesisObject: object;
+    p2p: CometBFTP2PPartial,
+    stateSync: CometBFTStateSyncPartial
+    //chosenPeerToRecoverGenesisSnapshot: NetworkNode,
+    //chosenPeersForStateSync: NetworkNode[]
 }
 
-type NetworkCreationParams = {
-    genesisPrivateKey: string;
-    createdNetworkName: string
-}
 
-export class NodeConfigParamsResolver {
+export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
+
     static resolveParams(options: any) {
         const resolver = new NodeConfigParamsResolver(options);
         return resolver.generateParams();
     }
 
-    constructor(private readonly options: any, private readonly  store = new NetworksStore()) {}
+    constructor(options: any, private readonly  store = new NetworksStore()) {
+        super(options);
+    }
 
     private async generateParams() {
         const moniker = await this.askMoniker();
         const hostDomainName = await this.askNodeDomainName();
         // ask for minimum gas
         const minMicroblockGasInAtomicAccepted = await this.askMinimumGasPriceAccepted();
-        const network = await this.askNetwork();
+
+        // ask the for network
+        const networkNames = await this.store.getNetworkNames();
+        const chosenNetworkName = await this.askChoiceAmongKnownNetworks(networkNames);
+        const networksStore = new NetworksStore();
+        const chosenNetwork = await networksStore.getNetworkByName(chosenNetworkName);
+
+
+        // ask for RPC endpoint to recover snapshot
+        const chosenRpcEndpointToRecoverGenesisSnapshot = await this.askToChooseNodeToRecoverGenesisSnapshot(
+            chosenNetwork
+        );
 
         const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
         const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
-        const isJoining = await this.askIsJoiningExistingNetwork();
-        const joiningParams = isJoining ? await this.askJoinParams() : undefined;
-        const creationParams = isJoining ? undefined : await this.askCreationParams();
+        const joiningParams = await this.askJoinParams(
+            chosenRpcEndpointToRecoverGenesisSnapshot,
+            chosenNetworkName,
+            chosenNetwork
+        );
 
         // deduce the exposed RPC domain name
         const transformer = new EndpointTransformer(exposedRpcEndpoint);
@@ -59,80 +82,52 @@ export class NodeConfigParamsResolver {
         const rpcListeningAddr = "tcp://0.0.0.0:26657"
 
 
+        const rpcPartial: CometBFTRPCPartial = {
+            cors_allowed_origins: corsAllowedOrigins,
+            laddr: rpcListeningAddr
+        }
+
+        const p2pPartial: CometBFTP2PPartial = {
+            ...joiningParams.p2p,
+            external_address: exposedP2pEndpoint,
+        }
+
+        const cometbftConfig: CometBFTConfigPartial = {
+            moniker,
+            proxy_app: proxyApp,
+            rpc: v.parse(CometBFTRpcSchema, rpcPartial),
+            p2p: v.parse(CometBFTP2PSchema, p2pPartial),
+            statesync: v.parse(CometBFTStateSyncSchema, joiningParams.stateSync),
+            consensus: v.parse(CometBFTConsensusSchema, {
+                create_empty_blocks_interval: await this.getCometbftEmptyMicroblockCreationInterval()
+            })
+        }
 
         const params: NodeConfigGenerationParams = {
             home: this.ensureHome(),
+            genesisJson: joiningParams.genesisObject,
             shouldDownload: {
                 caddyFile: true,
-                dockerCompose: true,
             },
-            network: network,
+            networkName: chosenNetworkName,
+            choseNetwork: chosenNetwork,
             abciConfig: {
                 home: this.getAbciHome(),
                 exposedRpcEndpoint: exposedRpcEndpoint,
                 exposedRpcDomainName: exposedRpcDomainName,
-                genesis: creationParams ? { sk: creationParams.genesisPrivateKey } : undefined,
-                genesis_snapshot: joiningParams ? { fromRpcEndpoint: joiningParams.chosenPeerToRecoverGenesisSnapshot.rpcEndpoint } : undefined,
+                genesis: undefined,
+                genesis_snapshot_origin: chosenRpcEndpointToRecoverGenesisSnapshot,
                 abciConfigFilename: 'config.toml',
                 min_microblock_gas_price_in_atomics: minMicroblockGasInAtomicAccepted,
             },
-            cometbftConfig: {
-                cors: {
-                    allowedOrigins: corsAllowedOrigins
-                },
-                persistentPeers: joiningParams !== undefined ? joiningParams.persistentPeersRpcTcpEndpoint : [],
-                seeds: joiningParams !== undefined ? joiningParams.seeds : [],
-                genesis: {
-                    networkName: creationParams !== undefined ? creationParams.createdNetworkName : undefined,
-                    overrideWith: joiningParams !== undefined ? joiningParams.genesis : undefined,
-                },
-                home: this.getCometbftHome(),
-                moniker,
-                proxyApp: proxyApp,
-                rpc: {
-                    laddr: rpcListeningAddr
-                },
-                p2p: {
-                    externalAddress: exposedP2pEndpoint
-                },
-                stateSync: joiningParams !== undefined ? {
-                    enabled: joiningParams.enableStateSync,
-                    trustHeight: joiningParams.trustHeight,
-                    trustHash: joiningParams.trustHash,
-                    rpcServers: joiningParams.chosenPeersForStateSync
-                } : undefined,
-                mempool: {
-                    createEmptyBlocksInterval: '30s'
-                }
-            }
+            cometbftConfig: v.parse(CometBFTConfigSchema, cometbftConfig)
         };
         return params;
     }
 
-    private async askMinimumGasPriceAccepted() {
-        const minGas = await input({
-            message: 'You have the possibility to reject microblocks having lower than a specified gas price.\nBy default, this value is 1 aCMTS (all microblocks are considered). Enter your minimum gas price accepted by the node (e.g., 0.1 CMTS, 100 aCMTS):',
-            default: "1 aCMTS",
-            validate: (value: string) => {
-                CMTSToken.parse(value);
-                return true;
-            }
-        })
-        return CMTSToken.parse(minGas).getAmountAsAtomic();
-    }
 
-    private async askNodeDomainName() {
-        return input({
-            message: 'Enter the domain name of your node (my-node.example.com):',
-            required: true,
-            validate: (value: string) => {
-                const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
-                return domainRegex.test(value) ? true : 'Invalid domain name format';
-            }
-        });
-    }
 
-    private async askSeedPeersP2pTcpEndpoint(nodes: NodeInfo[]): Promise<NodeInfo[]> {
+    private async askSeedPeersP2pTcpEndpoint(nodes: NetworkNode[]): Promise<NetworkNode[]> {
         // load the endpoints and raise a message if no seed available
         const endpoints = nodes.filter(node => node.isSeed);
         if (endpoints.length === 0) {
@@ -140,44 +135,37 @@ export class NodeConfigParamsResolver {
             return [];
         }
 
-        const chosenNodes =  await checkbox<NodeInfo>({
+        const chosenNodes =  await checkbox<NetworkNode>({
             choices: endpoints.map(node => ({ name: node.hostname, value: node })),
             message: 'Select seed peers (used to discover new peers in the network, highly recommended):',
         });
         return chosenNodes;
     }
 
-    private async askPersistentPeersRcpTcpEndpoint(nodes: NodeInfo[]): Promise<NodeInfo[]> {
+    private async askPersistentPeersRcpTcpEndpoint(nodes: NetworkNode[]): Promise<NetworkNode[]> {
         const nonSeedPeers = nodes.filter(node => !node.isSeed);
-        const chosenNodes =  await checkbox<NodeInfo>({
+        const chosenNodes =  await checkbox<NetworkNode>({
             choices: nonSeedPeers.map(node => ({ name: node.hostname, value: node })),
             message: 'Select persistent peers (that will remain connected to your node):',
         });
         return chosenNodes;
     }
 
-    private async askJoinParams(): Promise<NetworkJoinParams | undefined> {
-        // ask the user to select a network to join and load endpoints from the chosen networks
-        const networkNames = await this.store.getNetworkNames();
-        const chosenNetworkName = await this.askChoiceAmongKnownNetworks(networkNames);
+    private async askJoinParams(chosenRpcEndpointToRecoverGenesisSnapshot: NetworkNode, chosenNetworkName: string, chosenNetwork: Network): Promise<NetworkJoinParams> {
         const nodeService = new NodeInfoService();
-        const nodes = await nodeService.listNodesInNetwork(this.store, chosenNetworkName);
+        const nodes = await nodeService.listNodesInNetwork(chosenNetworkName, chosenNetwork);
 
 
         // ask the user to select seeds and persistent peers
-        const seedPeers = await this.askSeedPeersP2pTcpEndpoint(nodes);
-        const persistentPeers = await this.askPersistentPeersRcpTcpEndpoint(nodes);
+        const seedPeers: NetworkNode[] = await this.askSeedPeersP2pTcpEndpoint(nodes);
+        const persistentPeers: NetworkNode[] = await this.askPersistentPeersRcpTcpEndpoint(nodes);
 
-        // ask for trust height
-        const chosenRpcEndpoint = await this.askToChooseNodeToRecoverGenesisSnapshot(
-            nodes
-        );
-        const fetcher = new NodeInfoFetcher(chosenRpcEndpoint.rpcEndpoint);
+        const fetcher = NodeInfoFetcher.createFromNode(chosenRpcEndpointToRecoverGenesisSnapshot);
         const specifiedTrustHeight = await this.askTrustHeight();
 
         // ask for state-sync
         let possibleRpcServers = nodes.filter(node => !node.isSeed);
-        let chosenRpcServersForStateSync: NodeInfo[] = [];
+        let chosenRpcServersForStateSync: NetworkNode[] = [];
         let trustHeight, trustHash;
         let enableStateSync = false;
         const canEnableStateSync = possibleRpcServers.length >= 2;
@@ -198,7 +186,7 @@ export class NodeConfigParamsResolver {
                 } else {
                     // if the provided trust height is 'last', use the first servers
                     const chosenRpcServer = chosenRpcServersForStateSync[0];
-                    const fetcher = new NodeInfoFetcher(chosenRpcServer.rpcEndpoint);
+                    const fetcher = NodeInfoFetcher.createFromNode(chosenRpcServer);
 
                     if (specifiedTrustHeight === 'last') {
                         const response = await fetcher.fetchLastHeightAndHash();
@@ -231,160 +219,51 @@ export class NodeConfigParamsResolver {
         }
 
         // load the genesis from it
-        const genesis = await fetcher.fetchGenesis();
+        const genesis = await fetcher.fetchGenesisObject();
         if (genesis === undefined) throw new Error('Genesis not provided by the RPC node.')
 
+        // halt if trust height or trust hash undefined
+        if (trustHeight === undefined || trustHash === undefined) {
+            trustHash = ''
+            trustHeight = 0
+        }
+
         return {
-            persistentPeersRpcTcpEndpoint: persistentPeers,
-            seeds: seedPeers,
+            p2p: {
+                persistent_peers: persistentPeers
+                    .map((node: NetworkNode) => this.formatPersistentPeerForP2p(node))
+                    .join(',')
+            },
+            stateSync: {
+                enable: enableStateSync,
+                trust_height: trustHeight,
+                trust_hash: trustHash,
+                rpc_servers: seedPeers
+                    .map((node: NetworkNode) => this.formatRpcServersForStateSync(node))
+                    .join(',')
+            },
             enableStateSync,
             trustHash: trustHash !== undefined ? trustHash : "",
             trustHeight: trustHeight !== undefined ? trustHeight : 0,
-            genesis: genesis,
-            chosenPeerToRecoverGenesisSnapshot: chosenRpcEndpoint,
-            chosenPeersForStateSync: chosenRpcServersForStateSync
+            genesisObject: genesis
         }
     }
 
-    private async askRpcServersForStateSync(nodes: NodeInfo[]) {
+    private formatRpcServersForStateSync(node: NetworkNode) {
+        return `${node.nodeId}@${node.hostname}:26656`;
+    }
+
+    private formatPersistentPeerForP2p(node: NetworkNode) {
+        return `${node.nodeId}@${node.hostname}:26656`
+    }
+
+    private async askRpcServersForStateSync(nodes: NetworkNode[]) {
         const rpcServers = nodes.filter(node => !node.isSeed);//.map(node => node.rpcEndpoint);
-        const chosenRpcServers = await checkbox<NodeInfo>({
+        const chosenRpcServers = await checkbox<NetworkNode>({
             choices: rpcServers.map(node => ({ name: node.rpcEndpoint, value: node })),
             message: 'Select RPC servers to use for state sync:',
         });
         return chosenRpcServers;
-    }
-
-
-    private async askCreationParams(): Promise<NetworkCreationParams | undefined> {
-        const networkName = await this.askNetworkNameToCreate();
-        const sk = await this.askGenesisPrivateKey();
-        return {
-            createdNetworkName: networkName, genesisPrivateKey: sk
-        }
-    }
-
-    private ensureHome() {
-        const home = this.options.home;
-        if (typeof home !== "string") throw new Error(`${home} is not provided but is required`);
-        return path.resolve(home);
-    }
-
-
-    private getAbciHome(): string {
-        return this.options.home;
-    }
-
-    private  async askIsJoiningExistingNetwork() {
-        return (typeof this.options.join === 'boolean' && this.options.join) || confirm({
-            message: 'Are you joining an existing network?',
-            default: true
-        });
-    }
-
-    private askMoniker() {
-        return (
-            this.options.moniker ||
-            input({
-                message: 'Enter the name of your node',
-                required: true,
-                validate: (value: string) => typeof value === 'string' && value.length > 0 && value.trim().length > 0,
-            })
-        );
-    }
-
-    private async askCors() {
-        let cors = ["*"]
-        let agreed = false;
-        let shouldAskIfOk = true;
-        do {
-            if (shouldAskIfOk) {
-                agreed = await confirm({
-                    message: `Are you satisfied with the following cors configuration: ${JSON.stringify(cors) || '(none)'}?`,
-                });
-            }
-
-
-            if (!agreed) {
-                const formattedCors = await input({
-                    message: "Enter entries for your CORS configuration (separated by commas):",
-                    validate: (value: string) => typeof value === 'string' && value.length > 0 && value.trim().length > 0,
-                });
-                try {
-                    const corsEntries = formattedCors.split(',').map(entry => entry.trim());
-                    cors = corsEntries.filter(entry => entry.length > 0);
-                    shouldAskIfOk =  true;
-                } catch (e) {
-                    console.error("Invalid CORS configuration format. Please enter valid domain entries separated by commas.");
-                    shouldAskIfOk = false;
-                }
-            }
-        } while (!agreed);
-
-        return cors;
-    }
-
-    private askExposedRpcEndpoint(nodeDomainName: string) {
-        return (
-            this.options.exposedRpcEndpoint ||
-            input({
-                message: 'Enter the endpoint where one can contact the RPC interface of your node (https://example.com or http://example.com:26657):',
-                required: true,
-                default: `https://${nodeDomainName}`,
-                validate: (value: string) => {
-                    const transformer = new EndpointTransformer(value);
-                    return transformer.isHttpOrHttpsEndpoint();
-                },
-            })
-        );
-    }
-
-    private askExternalP2PAddr(nodeDomainName: string) {
-        return (
-            input({
-                message: 'Enter the TCP endpoint where one can contact the P2P interface of your node (example: tcp://example.com:26656)',
-                required: true,
-                default: `tcp://${nodeDomainName}:26656`
-            })
-        );
-    }
-
-    private askExposedP2pEndpoint() {
-        return (
-            this.options.exposedP2pEndpoint ||
-            input({
-                message: 'Enter the endpoint where one can contact the P2P interface of your node',
-                required: true,
-            })
-        );
-    }
-
-    private async askGenesisPrivateKey() {
-        return (
-            this.options.genesisPrivateKey ||
-            input({
-                message: 'Enter the private key used to generate the genesis state',
-                required: true,
-                validate: (value: string) => {
-                    const encoder = CryptoEncoderFactory.defaultStringSignatureEncoder();
-                    try {
-                        encoder.decodePrivateKey(value);
-                        return true;
-                    } catch {
-                        return false;
-                    }
-                },
-            })
-        );
-    }
-
-
-
-    private async askNetworkNameToCreate() {
-        return input({
-            message: 'Enter the name of the network you want to create:',
-            required: true,
-        });
     }
 
 
@@ -395,12 +274,18 @@ export class NodeConfigParamsResolver {
         });
     }
 
-    private async askToChooseNodeToRecoverGenesisSnapshot(nodes: NodeInfo[]) {
-        const endpoints = nodes.filter(node => !node.isSeed);//.map(node => node.rpcEndpoint);
-        return select<NodeInfo>({
-            choices: endpoints.map(node => ({ name: node.rpcEndpoint, value: node })),
+    private async askToChooseNodeToRecoverGenesisSnapshot(network: Network) {
+        const nodes = Object.entries(network.nodes);
+        const res: NetworkNode[] = [];
+        for (const [node, info] of nodes) {
+            if (info.isSeed) {
+                res.push(info)
+            }
+        }
+        return select<NetworkNode>({
+            choices: res.map(node => ({ name: node.rpcEndpoint, value: node })),
             message: 'Select one RPC endpoint to recover the genesis snapshot (used only during block-sync, not during state-sync):',
-            default: endpoints[0],
+            default: res[0],
         });
     }
 
@@ -421,20 +306,4 @@ export class NodeConfigParamsResolver {
             },
         })) as unknown as number;
     }
-
-    private getCometbftHome() {
-        return join(this.options.home, 'cometbft');
-    }
-
-    private async askNetwork() {
-        return select<string>({
-            message: 'Select the network:',
-            choices: [
-                { name: 'devnet', value: 'devnet' },
-                { name: 'testnet', value: 'testnet' }
-            ],
-            default: 'testnet'
-        });
-    }
-
 }

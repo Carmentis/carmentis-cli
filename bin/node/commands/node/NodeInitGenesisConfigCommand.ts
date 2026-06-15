@@ -4,14 +4,15 @@ import {SafeCommandRunner} from '../safeCommandRunner';
 import {NodeConfigGenerator} from '../../services/node/NodeConfigGenerator';
 import {DockerBinary} from "../../utils/dockerBinary";
 import {NodeConfigParamsResolver} from "../../services/node/NodeConfigParamsResolver";
+import {GenesisNodeConfigParamsResolver} from "../../services/node/GenesisNodeConfigParamsResolver";
 
-export class NodeInitConfigCommand {
+export class NodeInitGenesisConfigCommand {
     static register(program: commander.Command) {
-        NodeInitConfigCommand.registerOptions(
+        NodeInitGenesisConfigCommand.registerOptions(
             program
-            .command('init-config')
-            .description('Create a new node configuration')
-            .option('--home <home>', 'Path to create the configuration', '.')
+                .command('init-genesis-config')
+                .description('Create a new genesis node configuration')
+                .option('--home <home>', 'Path to create the configuration', '.')
         )
             .action(async (options) => {
                 await SafeCommandRunner.safeRun(async () => {
@@ -28,7 +29,7 @@ export class NodeInitConfigCommand {
                     }
 
                     // resolve the node config parameters
-                    const nodeParams = await NodeConfigParamsResolver.resolveParams(options);
+                    const nodeParams = await GenesisNodeConfigParamsResolver.resolveParams(options);
                     const init = new NodeConfigGenerator(nodeParams);
                     await init.generateConfig();
 

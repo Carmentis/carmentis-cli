@@ -29,7 +29,8 @@
     "deepmerge": "^4.3.1",
     "inquirer": "^12.10.0",
     "update-notifier": "^7.3.1",
-    "valibot": "^1.4.1"
+    "valibot": "^1.4.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
