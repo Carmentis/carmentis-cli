@@ -33,7 +33,7 @@ export class NodeConfigGenerator {
     async generateConfig() {
         // generate the cometbft config
         const cometBFTConfigGenerator = new CometBFTConfigGenerator(
-            this.params.home,
+            join(this.params.home, 'cometbft'),
             this.params.networkName,
             this.cometbftConfig,
             { genesisJson: this.params.genesisJson }
