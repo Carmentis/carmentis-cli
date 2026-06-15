@@ -1,5 +1,6 @@
 import commander from "commander";
 import {GenCommand} from "./gen/GenCommand";
+import {KeygenCommand} from "./KeygenCommand";
 
 export class CryptoCommand {
     constructor() {
@@ -11,5 +12,6 @@ export class CryptoCommand {
             .description('Crypto utility');
 
         GenCommand.register(crypto);
+        KeygenCommand.register(crypto);
     }
 }
