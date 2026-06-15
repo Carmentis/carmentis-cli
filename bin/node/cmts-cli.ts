@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { KeygenCommand } from './commands/KeygenCommand';
+import { KeygenCommand } from './commands/crypto/KeygenCommand';
 import { NetworksCommand } from './commands/NetworksCommand';
 import { Command } from 'commander';
 import {NodeCommand} from "./commands/node/NodeCommand";
@@ -40,7 +40,6 @@ const bootstrap = async () => {
         // register top-level commands
         NodeCommand.register(program);
         OperatorCommand.register(program);
-        KeygenCommand.register(program);
         new NetworksCommand().register(program);
         new DockerCommand().register(program);
         CryptoCommand.register(program);
