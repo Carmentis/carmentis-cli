@@ -17,6 +17,13 @@ const networks: NetworksFile = {
                 "p2pEndpoint": "node2.server2.devnet.carmentis.io:26656",
                 "trusted": true,
                 "nodeId": "8a322c84cea1d33e6f0efb674a2967dcf7955b4a"
+            },
+            "node3.server3.devnet.carmentis.io": {
+                "hostname": "node3.server3.devnet.carmentis.io",
+                "rpcEndpoint": "https://node3.server3.devnet.carmentis.io",
+                "p2pEndpoint": "node3.server3.devnet.carmentis.io:26656",
+                "trusted": true,
+                "nodeId": "8265be99b4d44c050a3e36b2da220a64cc6b78df"
             }
         }
     },
