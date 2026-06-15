@@ -8,10 +8,10 @@ import {NetworksStore} from "../networksStore";
 import {AbstractNodeConfigParamsResolver} from "./AbstractNodeConfigParamsResolver";
 import {CometBFTConfigSchema} from "../../types/CometbftConfig";
 import * as v from 'valibot';
+import {Network} from "../../types/NetworksFile";
 
 type NetworkCreationParams = {
     genesisPrivateKey: string;
-    createdNetworkName: string
 }
 
 export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
@@ -25,18 +25,54 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
         super(options)
     }
 
+    private askAbciLabel() {
+        return select<string>({
+            choices: ['mainnet', 'testnet', 'devnet'],
+            message: 'Select the ABCI Docker image label to use for the network:',
+            default: 'devnet'
+        })
+    }
+
     private async generateParams() {
-        const moniker = await this.askMoniker();
-        const hostDomainName = await this.askNodeDomainName();
-        // ask for minimum gas
-        const minMicroblockGasInAtomicAccepted = await this.askMinimumGasPriceAccepted();
+
+
+
+        // ask for the network name
         const networkName = await this.askNetworkNameToCreate();
+
+
+        // ensure the network not already defined locally
         const networksStore = new NetworksStore();
         const network = await networksStore.getNetworkByName(networkName);
+        if (network !== undefined) {
+            throw new Error(`A network with name ${networkName} already exists`)
+        }
 
+        // information about the node
+        const moniker = await this.askMoniker();
+        const hostDomainName = await this.askNodeDomainName();
         const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
         const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
         const creationParams = await this.askCreationParams();
+        const abciDockerImageLabel = await this.askAbciLabel();
+
+        // create the network
+        const createdNetwork: Network = {
+            abciDockerImageLabel: abciDockerImageLabel,
+            nodes: {
+                moniker: {
+                    hostname: hostDomainName,
+                    rpcEndpoint: exposedRpcEndpoint,
+                    p2pEndpoint: exposedP2pEndpoint,
+                    nodeId: "" // we do not have node id yet
+                }
+            }
+        }
+
+
+        // ask for minimum gas
+        const minMicroblockGasInAtomicAccepted = await this.askMinimumGasPriceAccepted();
+
 
         // deduce the exposed RPC domain name
         const transformer = new EndpointTransformer(exposedRpcEndpoint);
@@ -57,7 +93,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
             },
             genesisJson: undefined,
             networkName: networkName,
-            choseNetwork: network,
+            choseNetwork: createdNetwork,
             abciConfig: {
                 home: this.getAbciHome(),
                 exposedRpcEndpoint: exposedRpcEndpoint,
@@ -74,7 +110,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
                 persistentPeers: [],
                 seeds:  [],
                 genesis: {
-                    networkName: creationParams.createdNetworkName ,
+                    networkName: networkName,
                     overrideWith: undefined,
                 },
                 home: this.getCometbftHome(),
@@ -88,7 +124,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
                 },
                 stateSync: undefined,
                 consensus: {
-                    createEmptyBlocksInterval: '30s'
+                    createEmptyBlocksInterval: this.getCometbftEmptyMicroblockCreationInterval()
                 }
             })
         };
@@ -98,17 +134,19 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
 
 
     private async askCreationParams(): Promise<NetworkCreationParams> {
-        const networkName = await this.askNetworkNameToCreate();
         const sk = await this.askGenesisPrivateKey();
         return {
-            createdNetworkName: networkName, genesisPrivateKey: sk
+            genesisPrivateKey: sk
         }
     }
 
 
     private async askGenesisPrivateKey() {
+        const privateKeyInOption = this.options.genesisPrivateKey;
+        const privateKeyInEnv = process.env.GENESIS_PRIVATE_KEY;
         return (
-            this.options.genesisPrivateKey ||
+            privateKeyInOption ||
+            privateKeyInEnv ||
             input({
                 message: 'Enter the private key used to generate the genesis state',
                 required: true,

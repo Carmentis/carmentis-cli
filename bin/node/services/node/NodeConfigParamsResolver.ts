@@ -56,7 +56,7 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
         const chosenNetworkName = await this.askChoiceAmongKnownNetworks(networkNames);
         const networksStore = new NetworksStore();
         const chosenNetwork = await networksStore.getNetworkByName(chosenNetworkName);
-
+        if (chosenNetwork === undefined) throw new Error(`Network ${chosenNetworkName} not found: Please register the network first.`)
 
         // ask for RPC endpoint to recover snapshot
         const chosenRpcEndpointToRecoverGenesisSnapshot = await this.askToChooseNodeToRecoverGenesisSnapshot(

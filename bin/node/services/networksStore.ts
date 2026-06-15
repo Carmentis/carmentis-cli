@@ -141,7 +141,7 @@ export class NetworksStore {
         return Object.keys(store)
     }
 
-    async getNetworkByName(networkName: string): Promise<Network> {
+    async getNetworkByName(networkName: string): Promise<Network | undefined> {
         const networks = await this.read();
         return networks[networkName];
     }
