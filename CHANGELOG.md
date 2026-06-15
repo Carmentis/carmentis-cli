@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/Carmentis/carmentis-cli/compare/v1.13.0...v1.14.0) (2026-06-15)
+
+
+### Features
+
+* add new devnet node "node3.server3.devnet.carmentis.io" to default networks configuration ([a9a52bd](https://github.com/Carmentis/carmentis-cli/commit/a9a52bdf4c9ac855b95f4e9fbcc720cf88691c5e))
+
 # [1.13.0](https://github.com/Carmentis/carmentis-cli/compare/v1.12.1...v1.13.0) (2026-06-15)
 
 
