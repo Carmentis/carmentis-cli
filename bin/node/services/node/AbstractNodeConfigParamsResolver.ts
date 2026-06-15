@@ -11,10 +11,6 @@ export abstract class AbstractNodeConfigParamsResolver {
     ) {}
 
 
-    protected async getCometbftEmptyMicroblockCreationInterval() {
-        return '5s';
-    }
-
 
     protected async askMinimumGasPriceAccepted() {
         const minGas = await input({

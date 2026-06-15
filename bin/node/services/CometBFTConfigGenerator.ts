@@ -56,6 +56,52 @@ export class CometBFTConfigGenerator {
         // execute cometbft init
         CometBFTBinary.executeInit(this.cometbftHome);
 
+        // update genesis
+        if (this.options.genesisJson) {
+            JsonExporter.exportAt(this.options.genesisJson, this.genesisPath);
+        } else if (this.networkName) {
+            console.log("network name: " + this.networkName);
+            this.genesisEditor.write(['chain_id'], this.networkName);
+        }
+
+        // write top-level params
+        for (const [key, value] of Object.entries(this.params)) {
+            if (typeof value !== 'object') {
+                console.log(`Writing ${key}=${value} to config.toml`);
+                this.configTomlEditor.write(key, value);
+            }
+        }
+
+        // write consensus
+        const consensus = this.params.consensus;
+        for (const [key, value] of Object.entries(consensus)) {
+            console.log(`Writing consensus.${key}=${value} to config.toml`);
+            this.configTomlEditor.write(key, value, "consensus");
+        }
+
+        // write p2p
+        const p2p = this.params.p2p;
+        for (const [key, value] of Object.entries(p2p)) {
+            console.log(`Writing p2p.${key}=${value} to config.toml`);
+            this.configTomlEditor.write(key, value, "p2p");
+        }
+
+        // write statesync
+        const statesync = this.params.statesync;
+        for (const [key, value] of Object.entries(statesync)) {
+            console.log(`Writing statesync.${key}=${value} to config.toml`);
+            this.configTomlEditor.write(key, value, "statesync")
+        }
+
+        // write rpc
+        const rpc = this.params.rpc;
+        for (const [key, value] of Object.entries(rpc)) {
+            console.log(`Writing rpc.${key}=${value} to config.toml`);
+            this.configTomlEditor.write(key, value, "rpc");
+        }
+
+        /*
+        // update config
         this.writeMoniker(this.moniker);
 
         // update proxy app
@@ -107,6 +153,8 @@ export class CometBFTConfigGenerator {
             this.configTomlEditor.write("trust_hash", trust_hash, 'statesync');
             //this.enableRpcServersForStateSync(rpcServers, trustHeight, trustHash);
         }
+
+         */
     }
 
     private writeCors(allowedOrigins: string[]) {
