@@ -25,7 +25,6 @@ export class NetworksCommand {
             .addOption(new commander.Option('-l, --abci-docker-image-label <label>', 'ABCI Docker image label').default('mainnet'))
             .description('Add a new network')
             .action(async (name, options) => {
-                console.log(options)
                 await SafeCommandRunner.safeRun(() => this.createNetwork(name, options.abciDockerImageLabel));
             });
 
