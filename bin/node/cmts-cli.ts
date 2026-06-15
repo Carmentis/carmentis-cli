@@ -30,20 +30,26 @@ const bootstrap = async () => {
         isGlobal: true
     });
 
-    // create the description of the binary
-    const program = new Command("cmts");
-    program.name('Carmentis CLI').description('CLI for Carmentis');
+    if (updateInfo.current !== updateInfo.latest) {
+        console.log('Please, update the CLI to the latest version');
+    } else {
+        // create the description of the binary
+        const program = new Command("cmts");
+        program.name('Carmentis CLI').description('CLI for Carmentis');
 
-    // register top-level commands
-    NodeCommand.register(program);
-    OperatorCommand.register(program);
-    KeygenCommand.register(program);
-    new NetworksCommand().register(program);
-    new DockerCommand().register(program);
-    CryptoCommand.register(program);
-    UnsafeBetaCommand.register(program);
+        // register top-level commands
+        NodeCommand.register(program);
+        OperatorCommand.register(program);
+        KeygenCommand.register(program);
+        new NetworksCommand().register(program);
+        new DockerCommand().register(program);
+        CryptoCommand.register(program);
+        UnsafeBetaCommand.register(program);
 
-    program.parse(process.argv);
+        program.parse(process.argv);
+    }
+
+
 };
 
 bootstrap();
