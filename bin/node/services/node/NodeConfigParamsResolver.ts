@@ -98,9 +98,7 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
             rpc: v.parse(CometBFTRpcSchema, rpcPartial),
             p2p: v.parse(CometBFTP2PSchema, p2pPartial),
             statesync: v.parse(CometBFTStateSyncSchema, joiningParams.stateSync),
-            consensus: v.parse(CometBFTConsensusSchema, {
-                create_empty_blocks_interval: await this.getCometbftEmptyMicroblockCreationInterval()
-            })
+            consensus: v.parse(CometBFTConsensusSchema, {})
         }
 
         const params: NodeConfigGenerationParams = {

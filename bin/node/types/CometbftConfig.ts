@@ -87,7 +87,7 @@ const CometBFTMempoolSchema = v.object({
     recheck_timeout: v.optional(v.string(), "1s"),
     broadcast: v.optional(v.boolean(), true),
     wal_dir: v.optional(v.string(), ""),
-    size: v.optional(v.number(), 100),
+    size: v.optional(v.number(), 500),
     max_txs_bytes: v.optional(v.number(), 2000000),
     cache_size: v.optional(v.number(), 10000),
     "keep-invalid-txs-in-cache": v.optional(v.boolean(), false),

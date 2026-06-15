@@ -123,9 +123,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
                     externalAddress: exposedP2pEndpoint
                 },
                 stateSync: undefined,
-                consensus: {
-                    createEmptyBlocksInterval: this.getCometbftEmptyMicroblockCreationInterval()
-                }
+                consensus: {}
             })
         };
         return params;
