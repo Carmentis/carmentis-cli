@@ -20,27 +20,6 @@ const networks: NetworksFile = {
             }
         }
     },
-    "testnet": {
-        abciDockerImageLabel: 'testnet',
-        "nodes": {
-            "ares.testnet.carmentis.io": {
-                "hostname": "ares.testnet.carmentis.io",
-                "rpcEndpoint": "https://ares.testnet.carmentis.io",
-                "p2pEndpoint": "ares.testnet.carmentis.io:26656",
-                "trusted": true,
-                "isSeed": false,
-                "nodeId": "5241ff36fcb6a787889cf2009a3683a40bfe3cac"
-            },
-            "athena.testnet.opkods.com": {
-                "hostname": "athena.testnet.opkods.com",
-                "rpcEndpoint": "https://athena.testnet.opkods.com",
-                "p2pEndpoint": "athena.testnet.opkods.com:26656",
-                "trusted": true,
-                "isSeed": false,
-                "nodeId": "461958f6f2f2bed0809369a851ac15480b150834"
-            }
-        }
-    }
 }
 
 export function getDefaultNetworks() {
