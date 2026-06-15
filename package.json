@@ -26,8 +26,10 @@
     "@cmts-dev/carmentis-sdk": "^1.18.1",
     "@iarna/toml": "^2.2.5",
     "commander": "^14.0.1",
+    "deepmerge": "^4.3.1",
     "inquirer": "^12.10.0",
-    "update-notifier": "^7.3.1"
+    "update-notifier": "^7.3.1",
+    "valibot": "^1.4.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

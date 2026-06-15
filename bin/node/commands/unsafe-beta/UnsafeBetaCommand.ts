@@ -1,5 +1,4 @@
 import commander from "commander";
-import {GenAbciConfigCommand} from "./GenAbciConfigCommand";
 import {GenDockerComposeCommand} from "./GenDockerComposeCommand";
 import {ConvertTokenCommand} from "./ConvertTokenCommand";
 
@@ -10,7 +9,6 @@ export class UnsafeBetaCommand {
             .description("Commands still in testing (use at your own risk)");
 
         // register sub-commands
-        GenAbciConfigCommand.register(unsafeBetaCommand);
         GenDockerComposeCommand.register(unsafeBetaCommand);
         ConvertTokenCommand.register(unsafeBetaCommand);
     }

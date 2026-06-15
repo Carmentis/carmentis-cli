@@ -1,13 +1,13 @@
 import commander from "commander";
-import {SafeCommandRunner} from "../safeCommandRunner";
-import {AbciConfigGenerator} from "../../services/AbciConfigGenerator";
+import {SafeCommandRunner} from "../../safeCommandRunner";
+import {AbciConfigGenerator} from "../../../services/AbciConfigGenerator";
 import path from "node:path";
 
-export class GenAbciConfigCommand {
+export class NodeAbciInitConfigCommand {
     static register(program: commander.Command) {
         program
-            .command('gen-abci-config')
-            .description('Generate an ABCI configuration file with default parameters')
+            .command('gen-config')
+            .description('Generate an ABCI configuration file')
             .action(async () => {
                 await SafeCommandRunner.safeRun(async () => {
                     const homePath = path.resolve('.');
@@ -16,7 +16,7 @@ export class GenAbciConfigCommand {
                         home: homePath,
                         exposedRpcEndpoint: 'http://localhost:26657',
                         exposedRpcDomainName: 'localhost',
-                        nodeConfigFilename: 'config.toml',
+                        abciConfigFilename: 'config.toml',
                         min_microblock_gas_price_in_atomics: 1,
                     });
                     

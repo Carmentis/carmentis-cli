@@ -73,7 +73,7 @@ export class NodeConfigParamsResolver {
                 exposedRpcDomainName: exposedRpcDomainName,
                 genesis: creationParams ? { sk: creationParams.genesisPrivateKey } : undefined,
                 genesis_snapshot: joiningParams ? { fromRpcEndpoint: joiningParams.chosenPeerToRecoverGenesisSnapshot.rpcEndpoint } : undefined,
-                nodeConfigFilename: 'config.toml',
+                abciConfigFilename: 'config.toml',
                 min_microblock_gas_price_in_atomics: minMicroblockGasInAtomicAccepted,
             },
             cometbftConfig: {

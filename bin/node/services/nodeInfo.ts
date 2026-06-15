@@ -1,4 +1,5 @@
-import { NetworksFile, NetworksStore } from './networksStore';
+import { NetworksStore } from './networksStore';
+import {NetworksFile} from "../types/NetworksFile";
 
 export interface NodeInfo {
     network: string;

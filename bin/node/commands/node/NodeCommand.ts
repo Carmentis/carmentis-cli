@@ -3,6 +3,7 @@ import {NodeInitConfigCommand} from "./NodeInitConfigCommand";
 import {NodeResetCommand} from "./NodeResetCommand";
 import {NodeCheckUpdateCommand} from "./NodeCheckUpdateCommand";
 import {NodeInspectCommand} from "./NodeInspectCommand";
+import {NodeAbciCommand} from "./abci/NodeAbciCommand";
 
 export class NodeCommand {
     static register(program: commander.Command) {
@@ -12,6 +13,7 @@ export class NodeCommand {
 
 
         // register additional commands
+        NodeAbciCommand.register(nodeCommand)
         NodeInitConfigCommand.register(nodeCommand)
         NodeResetCommand.register(nodeCommand)
         NodeCheckUpdateCommand.register(nodeCommand)

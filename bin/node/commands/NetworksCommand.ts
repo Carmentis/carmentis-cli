@@ -1,11 +1,12 @@
 import commander from 'commander';
 import inquirer from 'inquirer';
 import {confirm} from '@inquirer/prompts';
-import {type NetworksFile, NetworksStore} from '../services/networksStore';
+import {NetworksStore} from '../services/networksStore';
 import {SafeCommandRunner} from './safeCommandRunner';
 import {NodeInfoFetcher} from '../utils/NodeInfoFetcher';
 import {FileManager} from '../utils/FileManager';
 import path from 'node:path';
+import {NetworksFile} from "../types/NetworksFile";
 
 function isFlag(token?: string): boolean {
     return !!token && token.startsWith('-');
@@ -21,9 +22,11 @@ export class NetworksCommand {
 
         networks
             .command('add-network <name>')
+            .addOption(new commander.Option('-l, --abci-docker-image-label <label>', 'ABCI Docker image label').default('mainnet'))
             .description('Add a new network')
-            .action(async (name) => {
-                await SafeCommandRunner.safeRun(() => this.createNetwork(name));
+            .action(async (name, options) => {
+                console.log(options)
+                await SafeCommandRunner.safeRun(() => this.createNetwork(name, options.abciDockerImageLabel));
             });
 
         networks
@@ -213,6 +216,7 @@ Examples:
             const nodesNumber = nodeNames.length;
 
             console.log(`\n🌐 Network: ${networkName} (${nodesNumber} node${nodesNumber > 1 ? 's' : ''})`);
+            console.log(`ABCI Docker image label: ${storeData[networkName].abciDockerImageLabel}`);
             console.log('--------------------------------------------------');
 
             for (const nodeName of nodeNames) {
@@ -254,8 +258,8 @@ Examples:
         }
     }
 
-    private async createNetwork(network: string): Promise<void> {
-        await this.store.createNetwork(network);
+    private async createNetwork(network: string, abciDockerImageLabel: string): Promise<void> {
+        await this.store.createNetwork(network, abciDockerImageLabel);
         console.log(`Network "${network}" created.`);
     }
 

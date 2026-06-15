@@ -1,9 +1,10 @@
 import {CometbftConfig, CometBFTConfigGenerator} from '../CometBFTConfigGenerator';
 import {join} from 'path';
-import {AbciConfigGenerator, AbciConfigParams} from '../AbciConfigGenerator';
+import {AbciConfigGenerator} from '../AbciConfigGenerator';
 import {EndpointTransformer} from '../../utils/EndpointTransformer';
 import {FileDownloader} from '../../utils/FileDownloader';
 import {FileManager} from "../../utils/FileManager";
+import {AbciConfigGenParams} from "../../types/NodeConfigGenParams";
 
 
 export type NodeConfigGenerationParams = {
@@ -14,7 +15,7 @@ export type NodeConfigGenerationParams = {
     };
     network: string;
     cometbftConfig: CometbftConfig,
-    abciConfig: AbciConfigParams,
+    abciConfig: AbciConfigGenParams,
 };
 
 export class NodeConfigGenerator {

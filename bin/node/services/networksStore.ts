@@ -2,21 +2,10 @@ import os from 'node:os';
 import path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { NodeInfoFetcher } from '../utils/NodeInfoFetcher';
+import {NetworksFile} from "../types/NetworksFile";
+import deepmerge from "deepmerge";
+import {getDefaultNetworks} from "../networks";
 
-export interface NetworksFile {
-    [networkName: string]: {
-        nodes: {
-            [nodeHostname: string]: {
-                hostname: string;
-                rpcEndpoint: string;
-                p2pEndpoint: string;
-                trusted?: boolean;
-                isSeed?: boolean;
-                nodeId: string;
-            };
-        };
-    };
-}
 
 export class NetworksStore {
     private readonly baseDir: string;
@@ -33,6 +22,12 @@ export class NetworksStore {
     }
 
     async read(): Promise<NetworksFile> {
+        const storedNetworks = await this.readStoredNetworks();
+        const defaultNetwork = getDefaultNetworks();
+        return deepmerge(storedNetworks, defaultNetwork);
+    }
+
+    private async readStoredNetworks(): Promise<NetworksFile> {
         try {
             const raw = await fs.readFile(this.filePath, 'utf8');
             const parsed = JSON.parse(raw);
@@ -52,12 +47,12 @@ export class NetworksStore {
         await fs.writeFile(this.filePath, json, 'utf8');
     }
 
-    async createNetwork(name: string): Promise<void> {
+    async createNetwork(name: string, abciDockerImageLabel: string): Promise<void> {
         const store = await this.read();
         if (store[name]) {
             throw new Error(`Network "${name}" already exists.`);
         }
-        store[name] = { nodes: {} };
+        store[name] = { abciDockerImageLabel, nodes: {} };
         await this.write(store);
     }
 

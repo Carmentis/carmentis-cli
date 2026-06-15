@@ -3,37 +3,28 @@ import { TomlExporter } from '../utils/TomlExporter';
 import { join } from 'path';
 import {input} from '@inquirer/prompts';
 import {CMTSToken} from "@cmts-dev/carmentis-sdk/server";
+import * as v from 'valibot';
+import {AbciConfigGenParams} from "../types/NodeConfigGenParams";
+import {AbciConfigSchema} from "../types/AbciConfig";
 
-export interface AbciConfigParams {
-    home: string,
-    exposedRpcEndpoint: string,
-    exposedRpcDomainName: string,
-    genesis?: {
-        sk: string,
-    },
-    genesis_snapshot?: {
-        fromRpcEndpoint: string,
-    },
-    nodeConfigFilename: string;
-    min_microblock_gas_price_in_atomics: number;
-}
+
+
+
+// The final ABCI config type
+
+
 export class AbciConfigGenerator {
 
-    constructor(private readonly params: AbciConfigParams) {}
+    constructor(private readonly params: AbciConfigGenParams) {}
 
     async generateConfig() {
-        let config: any = {
+        let config = v.parse(AbciConfigSchema, {
             cometbft: {
                 exposed_rpc_endpoint: this.exposedRpcEndpoint,
             },
             abci: {
                 grpc: {
                     port: 26_658
-                },
-                rest: {
-                    query: {
-                        port: 26_659
-                    }
                 },
                 min_microblock_gas_price_in_atomics: this.params.min_microblock_gas_price_in_atomics,
             },
@@ -46,30 +37,20 @@ export class AbciConfigGenerator {
                 block_history_before_snapshot: 0,
                 max_snapshots: 10,
             },
-        };
 
-        if (this.params.genesis_snapshot) {
-            config = {
-                ...config,
-                genesis_snapshot: {
-                    rpc_endpoint: this.params.genesis_snapshot.fromRpcEndpoint
-                }
-            }
-        }
+            // only for genesis nodes
+            genesis: this.params.genesis ? ({
+                private_key: {
+                    sk: this.params.genesis.sk,
+                },
+            }) : undefined,
 
-        if (this.params.genesis) {
-            config = {
-                ...config,
-                genesis: {
-                    private_key: {
-                        sk: this.params.genesis.sk,
-                    },
-                }
-            }
-        }
-
-        // export the config
-        const configFilePath = join(this.home, this.params.nodeConfigFilename);
+            // only for joining nodes
+            genesis_snapshot: this.params.genesis_snapshot ? ({
+                rpc_endpoint: this.params.genesis_snapshot.fromRpcEndpoint
+            }) : undefined
+        });
+        const configFilePath = join(this.home, this.params.abciConfigFilename);
         await TomlExporter.exportToFile(config, configFilePath);
     }
 

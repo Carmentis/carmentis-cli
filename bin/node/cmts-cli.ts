@@ -25,7 +25,7 @@ const notifier = updateNotifier({
 
 const bootstrap = async () => {
     // `notifier.update` contains some useful info about the update
-    await notifier.fetchInfo();
+    const updateInfo = await notifier.fetchInfo();
     notifier.notify({
         isGlobal: true
     });
