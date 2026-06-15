@@ -35,12 +35,12 @@ export class NodeInfoFetcher {
 
     async fetchLastHeightAndHash() {
         const url = this.rpcEndpoint.replace(/\/$/, '') + '/status';
-        const status = await this.fetch<{ result: { sync_info: { latest_block_height: number, latest_block_hash: string } } }>(url);
+        const status = await this.fetch<{ result: { sync_info: { latest_block_height: string, latest_block_hash: string } } }>(url);
         if (status === undefined) return undefined;
         const syncInfo = status.result.sync_info;
         return {
             latest_block_hash: syncInfo.latest_block_hash,
-            latest_block_height: syncInfo.latest_block_height,
+            latest_block_height: Number.parseInt(syncInfo.latest_block_height),
         };
     }
 

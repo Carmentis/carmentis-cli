@@ -275,17 +275,11 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
     }
 
     private async askToChooseNodeToRecoverGenesisSnapshot(network: Network) {
-        const nodes = Object.entries(network.nodes);
-        const res: NetworkNode[] = [];
-        for (const [node, info] of nodes) {
-            if (info.isSeed) {
-                res.push(info)
-            }
-        }
+        const nodes = Object.values(network.nodes);
         return select<NetworkNode>({
-            choices: res.map(node => ({ name: node.rpcEndpoint, value: node })),
+            choices: nodes.map(node => ({ name: node.rpcEndpoint, value: node })),
             message: 'Select one RPC endpoint to recover the genesis snapshot (used only during block-sync, not during state-sync):',
-            default: res[0],
+            default: nodes[0],
         });
     }
 

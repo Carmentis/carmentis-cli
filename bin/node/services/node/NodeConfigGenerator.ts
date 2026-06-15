@@ -51,6 +51,9 @@ export class NodeConfigGenerator {
         const uid = userInfo.uid;
         const gid = userInfo.gid;
 
+        // define the ports to use
+
+
         // create the Docker-compose
             const dockerComposePath = join(this.params.home, 'docker-compose.yml');
             await DockerComposeGenerator.generate(
