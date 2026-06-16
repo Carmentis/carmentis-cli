@@ -1,3 +1,12 @@
+# [1.15.0](https://github.com/Carmentis/carmentis-cli/compare/v1.14.0...v1.15.0) (2026-06-16)
+
+
+### Features
+
+* add CometBFT key management and signing/verification commands ([d1c1aff](https://github.com/Carmentis/carmentis-cli/commit/d1c1aff231bd34029f31ab6e282e5373fe9df18f))
+* add KeygenCommand to CryptoCommand and update import path ([17df772](https://github.com/Carmentis/carmentis-cli/commit/17df7726bb7fc4b85b2449c59afe2eea5f66898a))
+* add KeygenCommand to CryptoCommand and update import path ([1c5c400](https://github.com/Carmentis/carmentis-cli/commit/1c5c40046ebb4925a0f468979e0fcfaefc31b44e))
+
 # [1.14.0](https://github.com/Carmentis/carmentis-cli/compare/v1.13.0...v1.14.0) (2026-06-15)
 
 
