@@ -1,6 +1,6 @@
 {
   "name": "@cmts-dev/carmentis-cli",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Carmentis CLI",
   "author": "Carmentis",
   "license": "Apache-2.0",
@@ -25,6 +25,9 @@
   "dependencies": {
     "@cmts-dev/carmentis-sdk": "^1.18.1",
     "@iarna/toml": "^2.2.5",
+    "@noble/curves": "^2.2.0",
+    "@noble/ed25519": "^3.1.0",
+    "@noble/hashes": "^2.2.0",
     "commander": "^14.0.1",
     "deepmerge": "^4.3.1",
     "inquirer": "^12.10.0",

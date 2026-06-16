@@ -10,6 +10,7 @@ import {CryptoCommand} from "./commands/crypto/CryptoCommand";
 import {UnsafeBetaCommand} from "./commands/unsafe-beta/UnsafeBetaCommand";
 import updateNotifier from 'update-notifier';
 import packageJson from '../../package.json';
+import {CometBFTCommand} from "./commands/CometBFTCommand";
 
 
 // Checks for available update and returns an instance
@@ -38,6 +39,7 @@ const bootstrap = async () => {
         program.name('Carmentis CLI').description('CLI for Carmentis');
 
         // register top-level commands
+        CometBFTCommand.register(program);
         NodeCommand.register(program);
         OperatorCommand.register(program);
         new NetworksCommand().register(program);
