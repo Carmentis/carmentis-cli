@@ -28,7 +28,7 @@ const bootstrap = async () => {
     // `notifier.update` contains some useful info about the update
     const updateInfo = await notifier.fetchInfo();
 
-    if (updateInfo.current !== updateInfo.latest && false) {
+    if (updateInfo.current !== updateInfo.latest) {
         console.log(`Please, update the CLI to the latest version: ${updateInfo.current} - ${updateInfo.latest}`);
         console.log(`You can update the CLI by running: npm i -g @cmts-dev/carmentis-cli`);
     } else {
