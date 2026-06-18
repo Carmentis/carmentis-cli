@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/Carmentis/carmentis-cli/compare/v1.15.0...v1.15.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* enable CLI update notification logic by removing false condition ([394a018](https://github.com/Carmentis/carmentis-cli/commit/394a018924c7885ff7244eb9941601357af3b935))
+
 # [1.15.0](https://github.com/Carmentis/carmentis-cli/compare/v1.14.0...v1.15.0) (2026-06-16)
 
 
