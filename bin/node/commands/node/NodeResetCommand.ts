@@ -25,28 +25,44 @@ export class NodeResetCommand {
 
                     // check if cometbft folder exists
                     const cometbftExists = fs.existsSync(cometbftPath);
-
                     if (!abciExists && !cometbftExists) {
-                        console.log('No data to reset. Both abci and cometbft folders do not exist.');
+                        console.log('No data to reset. Both ABCI and CometBFT data directories are missing.');
                         return;
                     }
 
-                    // display what will be done
+                    console.log('');
+                    console.log('⚠️  WARNING: This operation will permanently delete node data.');
+                    console.log('⚠️  This command is intended for development and testing environments and replicator nodes only.');
+                    console.log('⚠️  Do NOT run this command on a production validator.');
+                    console.log('');
+
                     console.log('The following actions will be performed:');
+
                     if (abciExists) {
-                        console.log(`  - Delete folder: ${abciPath}`);
-                    }
-                    if (cometbftExists) {
-                        console.log(`  - Execute: cometbft unsafe-reset-all --home ${cometbftPath}`);
+                        console.log(`  • Delete ABCI data directory: ${abciPath}`);
                     }
 
+                    if (cometbftExists) {
+                        console.log(`  • Reset CometBFT state: ${cometbftPath}`);
+                        console.log(`    (cometbft unsafe-reset-all --home ${cometbftPath})`);
+                    }
+
+                    console.log('');
+
                     const confirmed = options.force || await confirm({
-                        message: `Are you sure you want to reset the node at ${homePath}?`,
-                        default: false
+                        message: [
+                            'This operation is irreversible.',
+                            'All data will be lost.',
+                            '',
+                            `Target node: ${homePath}`,
+                            '',
+                            'Continue?'
+                        ].join('\n'),
+                        default: false,
                     });
 
                     if (!confirmed) {
-                        console.log('Reset not confirmed, aborting');
+                        console.log('Operation cancelled.');
                         return;
                     }
 

@@ -20,19 +20,6 @@ import {
 import {NodeInfoService} from "../nodeInfo";
 import {NodeInfoFetcher} from "../../utils/NodeInfoFetcher";
 
-type NetworkJoinParams = {
-    //persistentPeersRpcTcpEndpoint: NetworkNode[];
-    //seeds: NetworkNode[];
-    enableStateSync: boolean;
-    trustHeight: number;
-    trustHash: string;
-    genesisObject: object;
-    p2p: CometBFTP2PPartial,
-    stateSync: CometBFTStateSyncPartial
-    //chosenPeerToRecoverGenesisSnapshot: NetworkNode,
-    //chosenPeersForStateSync: NetworkNode[]
-}
-
 
 export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
 
@@ -46,10 +33,6 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
     }
 
     private async generateParams() {
-        const moniker = await this.askMoniker();
-        const hostDomainName = await this.askNodeDomainName();
-        // ask for minimum gas
-        const minMicroblockGasInAtomicAccepted = await this.askMinimumGasPriceAccepted();
 
         // ask the for network
         const networkNames = await this.store.getNetworkNames();
@@ -58,117 +41,61 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
         const chosenNetwork = await networksStore.getNetworkByName(chosenNetworkName);
         if (chosenNetwork === undefined) throw new Error(`Network ${chosenNetworkName} not found: Please register the network first.`)
 
+
+        // ask the moniker
+        const moniker = await this.askMoniker();
+
+        // ask is the new node is a seed or not
+        const isSeed = await this.askCurrentNodeIsSeed();
+
+        // ask the node domain name and endpoints
+        const hostDomainName = await this.askNodeDomainName();
+        const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
+        const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
+
+
+
+
+        // ask for minimum gas (If running as seed then put irrealistic min gas price)
+        const minMicroblockGasInAtomicAccepted = isSeed ?
+            CMTSToken.oneCMTS().getAmountAsAtomic() :
+            await this.askMinimumGasPriceAccepted();
+
+        // recover the seeds from the network
+        const nodeService = new NodeInfoService();
+        const nodes = await nodeService.listNodesInNetwork(chosenNetworkName, chosenNetwork);
+        const seedPeers: NetworkNode[] = await this.askSeedPeersP2pTcpEndpoint(nodes);
+
         // ask for RPC endpoint to recover snapshot
         const chosenRpcEndpointToRecoverGenesisSnapshot = await this.askToChooseNodeToRecoverGenesisSnapshot(
             chosenNetwork
         );
-
-        const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
-        const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
-        const joiningParams = await this.askJoinParams(
-            chosenRpcEndpointToRecoverGenesisSnapshot,
-            chosenNetworkName,
-            chosenNetwork
-        );
-
-        // deduce the exposed RPC domain name
-        const transformer = new EndpointTransformer(exposedRpcEndpoint);
-        const exposedRpcDomainName = transformer.extractDomainName();
-
-        // cometbft-related config-independent config variables
-        const cors = await this.askCors();
-        const corsAllowedOrigins = cors;
-        const proxyApp = "tcp://node-abci:26658";
-        const rpcListeningAddr = "tcp://0.0.0.0:26657"
+        // load the genesis from it
+        const genesisNodeFetcher = NodeInfoFetcher.createFromNode(chosenRpcEndpointToRecoverGenesisSnapshot);
+        const genesis = await genesisNodeFetcher.fetchGenesisObject();
+        if (genesis === undefined) throw new Error('Genesis not provided by the RPC node.')
 
 
-        const rpcPartial: CometBFTRPCPartial = {
-            cors_allowed_origins: corsAllowedOrigins,
-            laddr: rpcListeningAddr
+        // ask persistent peers
+        const belongsToInitialNetwork = this.belongsToNetwork(chosenNetwork, hostDomainName);
+        let persistentPeers: NetworkNode[] = [];
+        if (belongsToInitialNetwork) {
+            console.log("This node is part of the initial network: making it fully connected")
+            persistentPeers = this.selectAllNodesExceptItselfInNet(chosenNetwork, hostDomainName);
+        } else {
+            persistentPeers = await this.askPersistentPeersRcpTcpEndpoint(nodes);
         }
 
-        const p2pPartial: CometBFTP2PPartial = {
-            ...joiningParams.p2p,
-            external_address: exposedP2pEndpoint,
-        }
-
-        const cometbftConfig: CometBFTConfigPartial = {
-            moniker,
-            proxy_app: proxyApp,
-            rpc: v.parse(CometBFTRpcSchema, rpcPartial),
-            p2p: v.parse(CometBFTP2PSchema, p2pPartial),
-            statesync: v.parse(CometBFTStateSyncSchema, joiningParams.stateSync),
-            consensus: v.parse(CometBFTConsensusSchema, {})
-        }
-
-        const params: NodeConfigGenerationParams = {
-            home: this.ensureHome(),
-            genesisJson: joiningParams.genesisObject,
-            shouldDownload: {
-                caddyFile: true,
-            },
-            networkName: chosenNetworkName,
-            choseNetwork: chosenNetwork,
-            abciConfig: {
-                home: this.getAbciHome(),
-                exposedRpcEndpoint: exposedRpcEndpoint,
-                exposedRpcDomainName: exposedRpcDomainName,
-                genesis: undefined,
-                genesis_snapshot_origin: chosenRpcEndpointToRecoverGenesisSnapshot,
-                abciConfigFilename: 'config.toml',
-                min_microblock_gas_price_in_atomics: minMicroblockGasInAtomicAccepted,
-            },
-            cometbftConfig: v.parse(CometBFTConfigSchema, cometbftConfig)
-        };
-        return params;
-    }
-
-
-
-    private async askSeedPeersP2pTcpEndpoint(nodes: NetworkNode[]): Promise<NetworkNode[]> {
-        // load the endpoints and raise a message if no seed available
-        const endpoints = nodes.filter(node => node.isSeed);
-        if (endpoints.length === 0) {
-            console.log("No seed nodes found, skipping seed peers selection.");
-            return [];
-        }
-
-        const chosenNodes =  await checkbox<NetworkNode>({
-            choices: endpoints.map(node => ({ name: node.hostname, value: node })),
-            message: 'Select seed peers (used to discover new peers in the network, highly recommended):',
-        });
-        return chosenNodes;
-    }
-
-    private async askPersistentPeersRcpTcpEndpoint(nodes: NetworkNode[]): Promise<NetworkNode[]> {
-        const nonSeedPeers = nodes.filter(node => !node.isSeed);
-        const chosenNodes =  await checkbox<NetworkNode>({
-            choices: nonSeedPeers.map(node => ({ name: node.hostname, value: node })),
-            message: 'Select persistent peers (that will remain connected to your node):',
-        });
-        return chosenNodes;
-    }
-
-    private async askJoinParams(chosenRpcEndpointToRecoverGenesisSnapshot: NetworkNode, chosenNetworkName: string, chosenNetwork: Network): Promise<NetworkJoinParams> {
-        const nodeService = new NodeInfoService();
-        const nodes = await nodeService.listNodesInNetwork(chosenNetworkName, chosenNetwork);
-
-
-        // ask the user to select seeds and persistent peers
-        const seedPeers: NetworkNode[] = await this.askSeedPeersP2pTcpEndpoint(nodes);
-        const persistentPeers: NetworkNode[] = await this.askPersistentPeersRcpTcpEndpoint(nodes);
-
-        const fetcher = NodeInfoFetcher.createFromNode(chosenRpcEndpointToRecoverGenesisSnapshot);
-        const specifiedTrustHeight = await this.askTrustHeight();
 
         // ask for state-sync
         let possibleRpcServers = nodes.filter(node => !node.isSeed);
         let chosenRpcServersForStateSync: NetworkNode[] = [];
         let trustHeight, trustHash;
         let enableStateSync = false;
+        let specifiedTrustHeight : number | 'last' = 0;// = await this.askTrustHeight();
         const canEnableStateSync = possibleRpcServers.length >= 2;
         if (!canEnableStateSync) {
-            console.warn("Not enough real nodes found to enable state sync, skipping state sync configuration.");
+            console.warn("Not enough nodes found to enable state sync, skipping state sync configuration.");
         } else {
             const userWantsStateSync = await confirm({
                 message: "Do you want to enable state sync?",
@@ -185,6 +112,7 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
                     // if the provided trust height is 'last', use the first servers
                     const chosenRpcServer = chosenRpcServersForStateSync[0];
                     const fetcher = NodeInfoFetcher.createFromNode(chosenRpcServer);
+                    specifiedTrustHeight = await this.askTrustHeight();
 
                     if (specifiedTrustHeight === 'last') {
                         const response = await fetcher.fetchLastHeightAndHash();
@@ -216,9 +144,7 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
             }
         }
 
-        // load the genesis from it
-        const genesis = await fetcher.fetchGenesisObject();
-        if (genesis === undefined) throw new Error('Genesis not provided by the RPC node.')
+
 
         // halt if trust height or trust hash undefined
         if (trustHeight === undefined || trustHash === undefined) {
@@ -226,33 +152,145 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
             trustHeight = 0
         }
 
-        return {
-            p2p: {
-                persistent_peers: persistentPeers
-                    .map((node: NetworkNode) => this.formatPersistentPeerForP2p(node))
-                    .join(',')
-            },
-            stateSync: {
-                enable: enableStateSync,
-                trust_height: trustHeight,
-                trust_hash: trustHash,
-                rpc_servers: seedPeers
-                    .map((node: NetworkNode) => this.formatRpcServersForStateSync(node))
-                    .join(',')
-            },
-            enableStateSync,
-            trustHash: trustHash !== undefined ? trustHash : "",
-            trustHeight: trustHeight !== undefined ? trustHeight : 0,
-            genesisObject: genesis
+        // deduce the exposed RPC domain name
+        const transformer = new EndpointTransformer(exposedRpcEndpoint);
+        const exposedRpcDomainName = transformer.extractDomainName();
+
+        // cometbft-related config-independent config variables
+        const corsAllowedOrigins = await this.askCors();
+        const proxyApp = "tcp://node-abci:26658";
+        const rpcListeningAddr = "tcp://0.0.0.0:26657"
+
+
+        const rpcPartial: CometBFTRPCPartial = {
+            cors_allowed_origins: corsAllowedOrigins,
+            laddr: rpcListeningAddr
         }
+
+        const p2pPartial: CometBFTP2PPartial = {
+            persistent_peers: persistentPeers
+                .map((node: NetworkNode) => this.formatPersistentPeerForP2p(node))
+                .join(','),
+            external_address: exposedP2pEndpoint,
+            seed_mode: isSeed,
+            seeds: seedPeers
+                .map((node: NetworkNode) => this.formatPersistentPeerForP2p(node))
+                .join(','),
+        }
+
+        const stateSyncPartial: CometBFTStateSyncPartial = {
+            enable: enableStateSync,
+            trust_height: trustHeight,
+            trust_hash: trustHash,
+            rpc_servers: persistentPeers
+                .map((node: NetworkNode) => this.formatRpcServersForStateSync(node))
+                .join(','),
+        }
+
+        const cometbftConfig: CometBFTConfigPartial = {
+            moniker,
+            proxy_app: proxyApp,
+            rpc: v.parse(CometBFTRpcSchema, rpcPartial),
+            p2p: v.parse(CometBFTP2PSchema, p2pPartial),
+            statesync: v.parse(CometBFTStateSyncSchema, stateSyncPartial),
+            consensus: v.parse(CometBFTConsensusSchema, {})
+        }
+
+        const params: NodeConfigGenerationParams = {
+            home: this.ensureHome(),
+            genesisJson: genesis,
+            shouldDownload: {
+                caddyFile: true,
+            },
+            networkName: chosenNetworkName,
+            choseNetwork: chosenNetwork,
+            abciConfig: {
+                home: this.getAbciHome(),
+                exposedRpcEndpoint: exposedRpcEndpoint,
+                exposedRpcDomainName: exposedRpcDomainName,
+                genesis: undefined,
+                genesis_snapshot_origin: chosenRpcEndpointToRecoverGenesisSnapshot,
+                abciConfigFilename: 'config.toml',
+                min_microblock_gas_price_in_atomics: minMicroblockGasInAtomicAccepted,
+            },
+            cometbftConfig: v.parse(CometBFTConfigSchema, cometbftConfig)
+        };
+        return params;
     }
 
-    private formatRpcServersForStateSync(node: NetworkNode) {
-        return `${node.nodeId}@${node.hostname}:26656`;
+    private belongsToNetwork(network: Network, hostname: string) {
+        return Object.values(network.nodes).find(f => f.hostname === hostname)
     }
 
-    private formatPersistentPeerForP2p(node: NetworkNode) {
-        return `${node.nodeId}@${node.hostname}:26656`
+    private selectAllNodesExceptItselfInNet(network: Network, hostname: string): NetworkNode[] {
+        return Object.values(network.nodes).filter(f => f.hostname === hostname)
+    }
+
+
+    private async askCurrentNodeIsSeed() {
+        const message = [
+            "Configure this node as a CometBFT seed node",
+            "",
+            "Seed nodes help peers discover other nodes in the network.",
+            "They do not participate in consensus or relay transactions.",
+            "",
+            "More information:",
+            "https://docs.cosmos.network/cometbft/latest/docs/core/Using-CometBFT#seed",
+            "",
+            "Run this node as a seed node?",
+        ];
+
+        return confirm({
+            message: message.join("\n"),
+            default: false,
+        });
+    }
+
+
+
+
+    private async askSeedPeersP2pTcpEndpoint(nodes: NetworkNode[]): Promise<NetworkNode[]> {
+        // load the endpoints and raise a message if no seed available
+        const endpoints = nodes.filter(node => node.isSeed);
+        if (endpoints.length === 0) {
+            console.log("No seed nodes found, skipping seed peers selection.");
+            return [];
+        }
+
+        const chosenNodes =  await checkbox<NetworkNode>({
+            choices: endpoints.map(node => ({ name: node.hostname, value: node })),
+            message: 'Select seed peers (used to discover new peers in the network, highly recommended):',
+        });
+        return chosenNodes;
+    }
+
+    private async askPersistentPeersRcpTcpEndpoint(nodes: NetworkNode[]): Promise<NetworkNode[]> {
+        const nonSeedPeers = nodes.filter(node => !node.isSeed);
+        const chosenNodes =  await checkbox<NetworkNode>({
+            choices: nonSeedPeers.map(node => ({ name: node.hostname, value: node })),
+            message: 'Select persistent peers (that will remain connected to your node):',
+        });
+        return chosenNodes;
+    }
+
+    /**
+     * Returns the peer as a string in the format nodeId@hostname:port
+     * @param node
+     * @param port
+     * @private
+     */
+    private formatRpcServersForStateSync(node: NetworkNode, port = 26656) {
+        return `${node.nodeId}@${node.hostname}:${port}`;
+    }
+
+    /**
+     * Returns the peer as a string in the format nodeId@hostname:port
+     * @param node
+     * @param port
+     * @private
+     */
+    private formatPersistentPeerForP2p(node: NetworkNode, port = 26656) {
+        return `${node.nodeId}@${node.hostname}:${port}`;
     }
 
     private async askRpcServersForStateSync(nodes: NetworkNode[]) {

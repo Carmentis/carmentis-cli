@@ -27,12 +27,10 @@ const notifier = updateNotifier({
 const bootstrap = async () => {
     // `notifier.update` contains some useful info about the update
     const updateInfo = await notifier.fetchInfo();
-    notifier.notify({
-        isGlobal: true
-    });
 
-    if (updateInfo.current !== updateInfo.latest) {
-        console.log('Please, update the CLI to the latest version');
+    if (updateInfo.current !== updateInfo.latest && false) {
+        console.log(`Please, update the CLI to the latest version: ${updateInfo.current} - ${updateInfo.latest}`);
+        console.log(`You can update the CLI by running: npm i -g @cmts-dev/carmentis-cli`);
     } else {
         // create the description of the binary
         const program = new Command("cmts");
