@@ -1,3 +1,12 @@
+## [1.15.2](https://github.com/Carmentis/carmentis-cli/compare/v1.15.1...v1.15.2) (2026-06-22)
+
+
+### Bug Fixes
+
+* re-enable `user` field in NodeConfigGenerator with previous caveat noted ([29451dd](https://github.com/Carmentis/carmentis-cli/commit/29451dd849986e6b5e7fc124d74c7787ac1d67d7))
+* temporarily disable `user` field in NodeConfigGenerator due to unexpected behavior ([766125f](https://github.com/Carmentis/carmentis-cli/commit/766125f3553aa8efd6456cff29f5eb0598f5aabe))
+* user in the docker compose and state-sync port adjustments ([51f2013](https://github.com/Carmentis/carmentis-cli/commit/51f2013d3e4fa07504236ec83e29119ce0eecf09))
+
 ## [1.15.1](https://github.com/Carmentis/carmentis-cli/compare/v1.15.0...v1.15.1) (2026-06-18)
 
 
