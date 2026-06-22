@@ -1,3 +1,10 @@
+## [1.15.4](https://github.com/Carmentis/carmentis-cli/compare/v1.15.3...v1.15.4) (2026-06-22)
+
+
+### Bug Fixes
+
+* invalid node id for node 2 ([c895a1e](https://github.com/Carmentis/carmentis-cli/commit/c895a1eb8395929f6b168e5cfc4df07e816557dd))
+
 ## [1.15.3](https://github.com/Carmentis/carmentis-cli/compare/v1.15.2...v1.15.3) (2026-06-22)
 
 
