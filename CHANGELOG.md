@@ -1,3 +1,10 @@
+## [1.15.3](https://github.com/Carmentis/carmentis-cli/compare/v1.15.2...v1.15.3) (2026-06-22)
+
+
+### Bug Fixes
+
+* invalid p2p for node1 ([6f82553](https://github.com/Carmentis/carmentis-cli/commit/6f8255324f4d461ff621fe8d251d212331e4e07e))
+
 ## [1.15.2](https://github.com/Carmentis/carmentis-cli/compare/v1.15.1...v1.15.2) (2026-06-22)
 
 
