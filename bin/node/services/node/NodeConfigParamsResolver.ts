@@ -280,7 +280,7 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
      * @private
      */
     private formatRpcServersForStateSync(node: NetworkNode) {
-        return node.rpcEndpoint;
+        return `tcp://${node.hostname}:26657`;
     }
 
     /**
