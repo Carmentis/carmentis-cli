@@ -18,6 +18,41 @@ export class AbciConfigGenerator {
     constructor(private readonly params: AbciConfigGenParams) {}
 
     async generateConfig() {
+        const defaultLogsConfig = {
+            sinks: {
+                console: {
+                    type: "console",
+                },
+            },
+            loggers: [
+                {
+                    category: ["node"],
+                    lowestLevel: "info",
+                    sinks: ["console"],
+                },
+                {
+                    category: ["node", "abci", "checkTx"],
+                    lowestLevel: "error",
+                    sinks: ["console"],
+                },
+                {
+                    category: ["node", "state", "GlobalStateUpdater"],
+                    lowestLevel: "error",
+                    sinks: ["console"],
+                },
+                {
+                    category: ["node", "accounts", "token"],
+                    lowestLevel: "error",
+                    sinks: ["console"],
+                },
+                {
+                    category: ["node", "early-rejection"],
+                    lowestLevel: "error",
+                    sinks: ["console"],
+                },
+            ],
+        };
+
         let config = v.parse(AbciConfigSchema, {
             cometbft: {
                 exposed_rpc_endpoint: this.exposedRpcEndpoint,
@@ -48,7 +83,10 @@ export class AbciConfigGenerator {
             // only for joining nodes
             genesis_snapshot: this.params.genesis_snapshot_origin ? ({
                 rpc_endpoint: this.params.genesis_snapshot_origin.rpcEndpoint
-            }) : undefined
+            }) : undefined,
+
+            // logs
+            logs: defaultLogsConfig,
         });
         const configFilePath = join(this.home, this.params.abciConfigFilename);
         await TomlExporter.exportToFile(config, configFilePath);
