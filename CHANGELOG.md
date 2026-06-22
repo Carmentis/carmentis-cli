@@ -1,3 +1,10 @@
+## [1.15.7](https://github.com/Carmentis/carmentis-cli/compare/v1.15.6...v1.15.7) (2026-06-22)
+
+
+### Bug Fixes
+
+* remove protocol from rpc server format ([96333b6](https://github.com/Carmentis/carmentis-cli/commit/96333b6fda5bd5eb956a580a89d10d0b1d512fe9))
+
 ## [1.15.6](https://github.com/Carmentis/carmentis-cli/compare/v1.15.5...v1.15.6) (2026-06-22)
 
 
