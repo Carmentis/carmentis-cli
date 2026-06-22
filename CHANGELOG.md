@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/Carmentis/carmentis-cli/compare/v1.15.7...v1.16.0) (2026-06-22)
+
+
+### Features
+
+* addition of default logs configuration for abci config generator ([b273e5e](https://github.com/Carmentis/carmentis-cli/commit/b273e5e8a1e130b03042422d43e92dfbb48c31f0))
+
 ## [1.15.7](https://github.com/Carmentis/carmentis-cli/compare/v1.15.6...v1.15.7) (2026-06-22)
 
 
