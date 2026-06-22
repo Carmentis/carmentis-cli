@@ -1,3 +1,10 @@
+## [1.15.6](https://github.com/Carmentis/carmentis-cli/compare/v1.15.5...v1.15.6) (2026-06-22)
+
+
+### Bug Fixes
+
+* invalid state sync rpc servers format ([82c6dc6](https://github.com/Carmentis/carmentis-cli/commit/82c6dc6fd4d4631d8b22162ce42de254b51bfa0b))
+
 ## [1.15.5](https://github.com/Carmentis/carmentis-cli/compare/v1.15.4...v1.15.5) (2026-06-22)
 
 
