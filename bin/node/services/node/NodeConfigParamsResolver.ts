@@ -279,7 +279,7 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
      * @param port
      * @private
      */
-    private formatRpcServersForStateSync(node: NetworkNode, port = 26656) {
+    private formatRpcServersForStateSync(node: NetworkNode, port = 26657) {
         return `${node.nodeId}@${node.hostname}:${port}`;
     }
 

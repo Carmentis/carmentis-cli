@@ -97,7 +97,7 @@ export class NodeConfigGenerator {
                             expose: [
                                 '26658',
                             ],
-                            user: `${uid}:${gid}`, // the user field does not work as expected.
+                            // user: `${uid}:${gid}`, // the user field does not work as expected.
                             volumes: [
                                 './cometbft:/cometbft',
                                 './abci:/abci',
