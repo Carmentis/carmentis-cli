@@ -16,7 +16,7 @@ const networks: NetworksFile = {
                 "rpcEndpoint": "https://node2.server2.devnet.carmentis.io",
                 "p2pEndpoint": "node2.server2.devnet.carmentis.io:26656",
                 "isGenesis": false,
-                "nodeId": "8a322c84cea1d33e6f0efb674a2967dcf7955b4a"
+                "nodeId": "a1cc9ece24d93515df8b3b44c95d3474893648b1"
             },
             "node3.server3.devnet.carmentis.io": {
                 "hostname": "node3.server3.devnet.carmentis.io",
