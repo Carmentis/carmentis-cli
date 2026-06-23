@@ -68,9 +68,9 @@ export class AbciConfigGenerator {
                 storage: '/abci',
             },
             snapshots:  {
-                snapshot_block_period: 50,
+                snapshot_block_period: 10000,
                 block_history_before_snapshot: 0,
-                max_snapshots: 10,
+                max_snapshots: 2,
             },
 
             // only for genesis nodes

@@ -135,7 +135,7 @@ export const CometBFTConsensusSchema =
         timeout_precommit_delta: v.optional(v.string(), "500ms"),
         timeout_commit: v.optional(v.string(), "1s"),
         double_sign_check_height: v.optional(v.number(), 0),
-        skip_timeout_commit: v.optional(v.boolean(), false),
+        skip_timeout_commit: v.optional(v.boolean(), true),
         create_empty_blocks: v.optional(v.boolean(), true),
         create_empty_blocks_interval: v.optional(v.string(), "30s"),
         peer_gossip_sleep_duration: v.optional(v.string(), "100ms"),

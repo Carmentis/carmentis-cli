@@ -27,6 +27,14 @@ const networks: NetworksFile = {
             }
         }
     },
+    "testnet": {
+        abciDockerImageLabel: 'testnet',
+        "nodes": {}
+    },
+    "mainnet": {
+        abciDockerImageLabel: 'mainnet',
+        "nodes": {}
+    }
 }
 
 export function getDefaultNetworks() {
