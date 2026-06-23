@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/Carmentis/carmentis-cli/compare/v1.16.0...v1.17.0) (2026-06-23)
+
+
+### Features
+
+* adapt default config for the mainnet ([986b209](https://github.com/Carmentis/carmentis-cli/commit/986b209a8b2132793b302c6db317e70d2e3317ec))
+
 # [1.16.0](https://github.com/Carmentis/carmentis-cli/compare/v1.15.7...v1.16.0) (2026-06-22)
 
 
