@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/Carmentis/carmentis-cli/compare/v1.17.0...v1.18.0) (2026-06-23)
+
+
+### Features
+
+* addition of key generation for genesis ([9f89fd2](https://github.com/Carmentis/carmentis-cli/commit/9f89fd25f5f4305365af8fbfb5963b92a37a2f96))
+
 # [1.17.0](https://github.com/Carmentis/carmentis-cli/compare/v1.16.0...v1.17.0) (2026-06-23)
 
 
