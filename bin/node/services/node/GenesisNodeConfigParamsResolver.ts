@@ -1,7 +1,7 @@
 import { NodeConfigGenerationParams} from "./NodeConfigGenerator";
 import {confirm} from "@inquirer/prompts";
 import {input, select, checkbox} from "@inquirer/prompts";
-import {CryptoEncoderFactory} from "@cmts-dev/carmentis-sdk/client";
+import {CryptoEncoderFactory, Secp256k1PrivateSignatureKey} from "@cmts-dev/carmentis-sdk/client";
 import {EndpointTransformer} from "../../utils/EndpointTransformer";
 import path from "node:path";
 import {NetworksStore} from "../networksStore";
@@ -53,7 +53,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
         const hostDomainName = await this.askNodeDomainName();
         const exposedRpcEndpoint = await this.askExposedRpcEndpoint(hostDomainName);
         const exposedP2pEndpoint = await this.askExternalP2PAddr(hostDomainName);
-        const creationParams = await this.askCreationParams();
+        const sk = await this.askGenesisPrivateKey();
         const abciDockerImageLabel = await this.askAbciLabel();
 
         // create the network
@@ -98,7 +98,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
                 home: this.getAbciHome(),
                 exposedRpcEndpoint: exposedRpcEndpoint,
                 exposedRpcDomainName: exposedRpcDomainName,
-                genesis: { sk: creationParams.genesisPrivateKey },
+                genesis: { sk },
                 genesis_snapshot_origin:  undefined,
                 abciConfigFilename: 'config.toml',
                 min_microblock_gas_price_in_atomics: minMicroblockGasInAtomicAccepted,
@@ -130,22 +130,25 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
     }
 
 
-
-    private async askCreationParams(): Promise<NetworkCreationParams> {
-        const sk = await this.askGenesisPrivateKey();
-        return {
-            genesisPrivateKey: sk
-        }
-    }
-
-
-    private async askGenesisPrivateKey() {
+    private async askGenesisPrivateKey(): Promise<string> {
+        // if already indicated, use it
         const privateKeyInOption = this.options.genesisPrivateKey;
         const privateKeyInEnv = process.env.GENESIS_PRIVATE_KEY;
-        return (
-            privateKeyInOption ||
-            privateKeyInEnv ||
-            input({
+        if (privateKeyInOption) return privateKeyInOption;
+        if (privateKeyInEnv) return privateKeyInEnv;
+
+
+        // otherwise, ask if the key should be generated
+        const userWantsToGenerateKey = await confirm({
+            message: 'Do you want to generate a new private key for the genesis state?',
+            default: true,
+        })
+        if (userWantsToGenerateKey) {
+            const sk = Secp256k1PrivateSignatureKey.gen();
+            const encoder = CryptoEncoderFactory.defaultStringSignatureEncoder();
+            return await encoder.encodePrivateKey(sk);
+        } else {
+            return input({
                 message: 'Enter the private key used to generate the genesis state',
                 required: true,
                 validate: (value: string) => {
@@ -158,7 +161,7 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
                     }
                 },
             })
-        );
+        }
     }
 
 
