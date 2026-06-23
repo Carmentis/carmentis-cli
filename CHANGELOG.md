@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/Carmentis/carmentis-cli/compare/v1.18.0...v1.19.0) (2026-06-23)
+
+
+### Features
+
+* add CometBFT `show-node-id` and `show-validator` commands ([5915ab6](https://github.com/Carmentis/carmentis-cli/commit/5915ab65ccf06abaa84101a67942dfdcb6337f07))
+
 # [1.18.0](https://github.com/Carmentis/carmentis-cli/compare/v1.17.0...v1.18.0) (2026-06-23)
 
 
