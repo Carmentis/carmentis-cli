@@ -6,6 +6,7 @@ import {CometBftKeySchema, CometBftPubKeySchema, ValidatorKeySchema} from "../ty
 import { readFileSync } from "fs";
 import {sha256, sha512} from "@noble/hashes/sha2.js";
 import {hashes} from "@noble/ed25519";
+import {CometBFTBinary} from "../services/CometBFTBinary";
 hashes.sha512 = sha512;
 
 export class CometBFTCommand {
@@ -87,11 +88,27 @@ export class CometBFTCommand {
     }
 
     static register(program: commander.Command) {
-        const docker = program
+        const comet = program
             .command('cometbft')
             .description('CometBFT utility command');
 
-        docker
+        comet
+            .command("show-node-id")
+            .action(async () => {
+                await SafeCommandRunner.safeRun(async () => {
+                    CometBFTBinary.execute("show-node-id")
+                });
+            })
+
+        comet
+            .command("show-validator")
+            .action(async () => {
+                await SafeCommandRunner.safeRun(async () => {
+                    CometBFTBinary.execute("show-validator")
+                });
+            })
+
+        comet
             .command("sign")
             .arguments('<keyPath>')
             .arguments('<message>')
@@ -106,7 +123,7 @@ export class CometBFTCommand {
                 });
             });
 
-        docker.command("verify")
+        comet.command("verify")
             .description("Verify a signed message")
             .arguments('<keyPath>')
             .arguments('<message>')

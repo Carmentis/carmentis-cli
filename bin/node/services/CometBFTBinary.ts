@@ -7,6 +7,33 @@ import * as os from 'os';
 
 
 export class CometBFTBinary {
+
+    static execute(command: string, home:string = ".", executeInDocker: boolean = true) {
+        if (executeInDocker) {
+            const resolvedPath = path.resolve(home);
+            if (!fs.existsSync(resolvedPath)) {
+                throw new Error(`Home path ${resolvedPath} does not exist`);
+            }
+
+            const dockerArgs = [
+                'run',
+                '--rm',
+                '-v', `${resolvedPath}:/cometbft`,
+                '-u', `${os.userInfo().uid.toString()}:${os.userInfo().gid.toString()}`,
+                'cometbft/cometbft:v0.38.x',
+                `${command}`
+            ];
+
+            const result = spawnSync('docker', dockerArgs, { stdio: 'inherit' });
+
+            if (result.error) {
+                console.error('Error during docker execution :', result.error);
+                process.exit(1);
+            };
+        } else {
+            Binary.execute(command);
+        }
+    }
     static executeInit(home: string, executeInDocker: boolean = true) {
         if (executeInDocker) {
             // we ensure the provided home is a folder (or create it if not exists)
