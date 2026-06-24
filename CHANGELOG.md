@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/Carmentis/carmentis-cli/compare/v1.19.0...v1.20.0) (2026-06-24)
+
+
+### Features
+
+* add Carmenta node configuration to mainnet ([be12338](https://github.com/Carmentis/carmentis-cli/commit/be12338573943120e86f093d5a75fdc53fb3f68f))
+
 # [1.19.0](https://github.com/Carmentis/carmentis-cli/compare/v1.18.0...v1.19.0) (2026-06-23)
 
 
