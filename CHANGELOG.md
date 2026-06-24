@@ -1,3 +1,16 @@
+# [1.21.0](https://github.com/Carmentis/carmentis-cli/compare/v1.20.1...v1.21.0) (2026-06-24)
+
+
+### Bug Fixes
+
+* add isGenesis attribute for nodes and update node configuration logic ([b21de95](https://github.com/Carmentis/carmentis-cli/commit/b21de9595f93aa95067c82314872914bf42c619e))
+
+
+### Features
+
+* add additional Carmenta nodes and default values for isSeed/isGenesis attributes ([98447f1](https://github.com/Carmentis/carmentis-cli/commit/98447f1f6f63b7906b5d748355c8f6a611f83275))
+* add seed node configuration and default isSeed attributes for all nodes ([99b61fa](https://github.com/Carmentis/carmentis-cli/commit/99b61faeb2d1da47c3f8ff4ae9a8ea7e6aa523b2))
+
 ## [1.20.1](https://github.com/Carmentis/carmentis-cli/compare/v1.20.0...v1.20.1) (2026-06-24)
 
 
