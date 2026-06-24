@@ -33,7 +33,15 @@ const networks: NetworksFile = {
     },
     "mainnet": {
         abciDockerImageLabel: 'mainnet',
-        "nodes": {}
+        "nodes": {
+            "carmenta.carmentis.io": {
+                "hostname": "carmenta.carmentis.io",
+                "rpcEndpoint": "https://carmenta.carmentis.io",
+                "p2pEndpoint": "carmenta.carmentis.io:26656",
+                isGenesis: true,
+                nodeId: "03bda55a1304b3e6535fcbee27fd3210d55f6bc40"
+            }
+        }
     }
 }
 
