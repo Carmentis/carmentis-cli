@@ -76,7 +76,7 @@ export class NetworksStore {
         try {
             const nodeId = await fetcher.extractNodeId();
             if (typeof nodeId === 'string') {
-                n.nodes[hostname] = { hostname, rpcEndpoint, p2pEndpoint, isSeed, nodeId };
+                n.nodes[hostname] = { hostname, rpcEndpoint, p2pEndpoint, isSeed, nodeId, isGenesis: Object.keys(n.nodes).length === 0 };
             } else {
                 throw new Error(`Unable to obtain the node identifier for ${hostname} (contacted ${rpcEndpoint})`)
             }

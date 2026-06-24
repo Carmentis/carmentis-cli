@@ -64,7 +64,9 @@ export class GenesisNodeConfigParamsResolver extends AbstractNodeConfigParamsRes
                     hostname: hostDomainName,
                     rpcEndpoint: exposedRpcEndpoint,
                     p2pEndpoint: exposedP2pEndpoint,
-                    nodeId: "" // we do not have node id yet
+                    nodeId: "", // we do not have node id yet,
+                    isSeed: false,
+                    isGenesis: true,
                 }
             }
         }
