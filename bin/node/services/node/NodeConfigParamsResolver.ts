@@ -73,7 +73,12 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
         // load the genesis from it
         const genesisNodeFetcher = NodeInfoFetcher.createFromNode(chosenRpcEndpointToRecoverGenesisSnapshot);
         const genesis = await genesisNodeFetcher.fetchGenesisObject();
-        if (genesis === undefined) throw new Error('Genesis not provided by the RPC node.')
+        if (genesis === undefined) {
+            const shouldContinue = await this.askToContinueWithoutGenesis();
+            if (!shouldContinue) {
+                throw new Error('Genesis not provided by the RPC node.')
+            }
+        }
 
 
         // ask persistent peers
@@ -335,5 +340,12 @@ export class NodeConfigParamsResolver extends AbstractNodeConfigParamsResolver {
                 }
             },
         })) as unknown as number;
+    }
+
+    private async askToContinueWithoutGenesis() {
+        return (await confirm({
+            message: 'Genesis not provided by the RPC node. Do you want to continue without it?',
+            default: false,
+        })) as boolean;
     }
 }

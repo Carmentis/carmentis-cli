@@ -27,9 +27,18 @@ export class NodeInfoFetcher {
     }
 
     async fetchGenesisObject() {
-        const url = this.rpcEndpoint.replace(/\/$/, '') + '/genesis';
-        const result = await this.fetch<{ result: { genesis: object } }>(url);
-        return result?.result?.genesis;
+        try {
+            const url = this.rpcEndpoint.replace(/\/$/, '') + '/genesis';
+            const result = await this.fetch<{ result: { genesis: object } }>(url);
+            return result?.result?.genesis;
+        } catch (e) {
+            let reason = "Unkown error"
+            if (e instanceof Error) {
+                reason = e.message;
+            }
+            console.error(`Failed to fetch genesis object from ${this.rpcEndpoint}: ${reason}`);
+            return undefined;
+        }
     }
 
 
