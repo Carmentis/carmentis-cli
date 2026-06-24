@@ -1,3 +1,10 @@
+## [1.20.1](https://github.com/Carmentis/carmentis-cli/compare/v1.20.0...v1.20.1) (2026-06-24)
+
+
+### Bug Fixes
+
+* handle missing genesis object in RPC response and add user prompt to continue ([b2d28c2](https://github.com/Carmentis/carmentis-cli/commit/b2d28c2d328c8541fdc0b2af462466ce1b9e8e42))
+
 # [1.20.0](https://github.com/Carmentis/carmentis-cli/compare/v1.19.0...v1.20.0) (2026-06-24)
 
 
