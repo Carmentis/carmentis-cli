@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@cmts-dev/carmentis-sdk": "^1.18.1",
+    "@cmts-dev/carmentis-sdk-core": "^1.2.29",
     "@iarna/toml": "^2.2.5",
     "@noble/curves": "^2.2.0",
     "@noble/ed25519": "^3.1.0",
