@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/Carmentis/carmentis-cli/compare/v1.21.0...v1.22.0) (2026-06-24)
+
+
+### Features
+
+* integrate `carmentis-sdk-core` dependency and add `SwitchKeyCommand` to CLI ([33a6ca6](https://github.com/Carmentis/carmentis-cli/commit/33a6ca63a405e45d2f16d779670c836ecc11d447))
+
 # [1.21.0](https://github.com/Carmentis/carmentis-cli/compare/v1.20.1...v1.21.0) (2026-06-24)
 
 
