@@ -4,8 +4,8 @@ export const NetworkNodeSchema = v.object({
     hostname: v.string(),
     rpcEndpoint: v.string(),
     p2pEndpoint: v.string(),
-    isSeed: v.optional(v.boolean()),
-    isGenesis: v.optional(v.boolean()),
+    isSeed: v.fallback(v.boolean(), false),
+    isGenesis: v.fallback(v.boolean(), false),
     nodeId: v.string(),
 });
 

@@ -40,6 +40,27 @@ const networks: NetworksFile = {
                 "p2pEndpoint": "carmenta.carmentis.io:26656",
                 isGenesis: true,
                 nodeId: "03bda55a1304b3e6535fcbee27fd3210d55f6bc40"
+            },
+            "mercurius.carmentis.io": {
+                "hostname": "mercurius.carmentis.io",
+                "rpcEndpoint": "https://mercurius.carmentis.io",
+                "p2pEndpoint": "mercurius.carmentis.io:26656",
+                isGenesis: false,
+                nodeId: "7e773f858d2a6be3a9a51e05262c73f82a944a4e"
+            },
+            "antevorta.carmentis.io": {
+                "hostname": "antevorta.carmentis.io",
+                "rpcEndpoint": "https://antevorta.carmentis.io",
+                "p2pEndpoint": "antevorta.carmentis.io:26656",
+                isGenesis: false,
+                nodeId: "d179e8aaccf8d46c588470ccdc6be3646dc389ed"
+            },
+            "postvorta.carmentis.io": {
+                "hostname": "postvorta.carmentis.io",
+                "rpcEndpoint": "https://postvorta.carmentis.io",
+                "p2pEndpoint": "postvorta.carmentis.io:26656",
+                isGenesis: false,
+                nodeId: "fd0fd7c61e3c610defab02989720d13e45eee7b2"
             }
         }
     }
